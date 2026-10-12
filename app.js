@@ -399,7 +399,7 @@
       <section class="card"><h3>Fichiers lus</h3><div class="hscroll"><table class="tbl"><thead><tr><th>Fichier</th><th>Statut</th><th>generated_at</th><th>Lu à</th></tr></thead><tbody>${Object.entries(diag.files).map(([k, v]) => `<tr><td title="${esc(v.url)}">${esc(k)}</td><td>${esc(v.status)}${v.error ? " " + esc(v.error) : ""}</td><td>${esc(v.generated_at || "")}</td><td>${esc(v.at ? L.paris(v.at).time : "")}</td></tr>`).join("")}</tbody></table></div></section>
       <section class="card"><h3>Requêtes de la session par hôte</h3>${li(Object.entries(diag.hosts).map(([h, n]) => `${h} : ${n}`))}</section>
       <section class="card"><h3>Anomalies de validation</h3>${li(diag.validation)}<h3>Lecture finale</h3>${li(diag.finalAnomalies)}<h3>Cohérence</h3>${li(diag.cohAnomalies)}<h3>Écart de bilan</h3>${li(diag.bilanDiff)}</section>
-      <section class="card"><h3>Moteur</h3><p>engine_status : ${esc(m && m.engine_status && m.engine_status.level)} ${esc(m && m.engine_status && m.engine_status.message_fr || "")}</p><p>api_usage : ${m && m.api_usage ? `${m.api_usage.used} / ${m.api_usage.limit} le ${esc(m.api_usage.date)} (plan jusqu'au ${esc(m.api_usage.plan_expires)})` : "—"}</p></section>
+      <section class="card"><h3>Moteur</h3><p>engine_status : ${esc(m && m.engine_status && m.engine_status.level)} ${esc(m && m.engine_status && m.engine_status.message_fr || "")}</p><p>api_usage : ${m && m.api_usage ? `${m.api_usage.used} / ${m.api_usage.limit} le ${esc(m.api_usage.date)} (plan : ${esc(m.api_usage.plan_expires)})` : "—"}</p></section>
       <section class="card"><p>Stockage local : ${(size / 1024).toFixed(0)} Ko</p><button id="clearcache">Vider le cache local</button></section>`;
   }
   // ---------------- routeur ----------------
