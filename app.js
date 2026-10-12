@@ -154,7 +154,9 @@
     const d = prefs.date;
     if (m) await loadDate(d);
     const fx = fixturesOf(d); const reg = prefs.region;
-    const aff = L.affiches(fx, d, reg, prefs.n), hr = L.heure(fx, d, reg), nt = L.nuit(fx, d, reg);
+    const d1 = L.addDays(d, 1); if (m && avail.includes(d1)) await loadDate(d1);
+    const aff = L.affiches(fx, d, reg, prefs.n), hr = L.heure(fx, d, reg), nt = L.nuit(fixturesOf(d1), d1, reg); // « Nuit » = la nuit qui suit (00h–08h du lendemain)
+    const dl1 = L.dayLabel(d1); const nuitTitle = `Cette nuit (${dl1.wd} ${dl1.day} ${dl1.month}, 00h–08h)`;
     const sp = L.suivisSplit(suivis, now()); if (sp.purge.length) { for (const id of sp.purge) delete suivis[id]; saveSuivis(); }
     const regOK = s => reg === "toutes" || s.region === reg;
     const act = sp.active.filter(regOK), arch = sp.archived.filter(regOK);
@@ -175,7 +177,8 @@
     } else if (prefs.view === "heure") {
       let h = ""; body = `<ul class="list">` + hr.map(f => { const hh = L.hm(f.kickoff); const sep = hh !== h ? `<li class="sep">${hh}</li>` : ""; h = hh; return sep + row(f); }).join("") + `</ul>`;
       if (!hr.length) body += `<p class="empty">Aucun match.</p>`;
-    } else if (prefs.view === "nuit") body = list(nt) || "";
+    } else if (prefs.view === "nuit") body = nt.length ? `<p class="sep">${nuitTitle}</p>` + list(nt) : "";
+    if ((prefs.view === "heure" || prefs.view === "affiches") && nt.length) body += `<h3 class="sep nuit">${nuitTitle}</h3>` + list(nt);
     else body = suivisView(act, arch);
     if ((prefs.view === "nuit" && !nt.length) || (prefs.view === "affiches" && !aff.rows.length)) body += `<p class="empty">Aucun match.</p>`;
     if (x.picks_status === 404 && prefs.view !== "suivis" && x.fixtures) body = `<p class="note">Lectures pas encore publiées pour le ${fmtDate(d)}.</p>` + body;
