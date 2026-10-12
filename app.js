@@ -33,7 +33,8 @@
   }
   const cacheKey = p => `am.v6.cache.${MODE === "real" ? "real" : MODE}.${p}`;
   async function fetchJSON(path) {
-    const url = `${BASE}/${mapPath(path)}`; let host;
+    const bust = /^https?:/.test(BASE) && (path === "meta.json" || path.startsWith("live/")) ? `?t=${Math.floor(Date.now() / 60e3)}` : "";
+    const url = `${BASE}/${mapPath(path)}${bust}`; let host;
     try { host = new URL(url, location.href).host; } catch (e) { host = "?"; }
     let lastErr = null;
     for (let attempt = 0; attempt < 2; attempt++) {
@@ -120,7 +121,7 @@
     if (fin && r) { const o = L.outcome(r.pick.market, r.pick.selection, f.score.home, f.score.away); res = o === "won" ? `<span class="res ok" aria-label="pick gagné">✓</span>` : o === "lost" ? `<span class="res ko" aria-label="pick perdu">✗</span>` : ""; }
     return `<li class="row" data-open="${f.fixture_id}" data-date="${f._date}">
       <a class="rowlink" href="#/match/${f.fixture_id}?d=${f._date}">
-        <span class="time${live ? " live" : ""}${fin ? " fin" : ""}">${esc(L.statusText(f))}${(live || fin || f.status.short === "HT") ? `<span class="ko">${L.hm(f.kickoff)}</span>` : ""}</span>
+        <span class="time${live ? " live" : ""}${fin ? " fin" : ""}">${live && f.score && f.score.home != null ? `<span class="sc">${f.score.home}-${f.score.away}</span><span class="mn">${f.status.short === "HT" ? "MT" : f.status.elapsed != null ? f.status.elapsed + "'" : ""}</span>` : esc(L.statusText(f))}${(live || fin || f.status.short === "HT") ? `<span class="ko">${L.hm(f.kickoff)}</span>` : ""}</span>
         <span class="mid">
           <span class="lgl"><span class="cc">${esc(f.league.country_code || "")}</span> ${leagueLabel(f)}${une ? ` <span class="une">À la une</span>` : ""}</span>
           <span class="tm">${logo(f.home)}<span class="nm">${esc(f.home.name)}</span></span>
@@ -477,7 +478,7 @@
   function interval() {
     const d = prefs.date || L.paris(now()).date; const fx = fixturesOf(d); const t = now().getTime();
     const hot = fx.some(f => L.LIVE.includes(f.status.short) || (Date.parse(f.kickoff) > t && Date.parse(f.kickoff) - t < 2 * 3600e3));
-    return hot ? 5 * 60e3 : 15 * 60e3;
+    return fx.some(f => L.LIVE.includes(f.status.short)) ? 60e3 : hot ? 5 * 60e3 : 15 * 60e3;
   }
   setInterval(() => { if (document.visibilityState === "visible" && Date.now() - state.lastMetaAt >= interval()) refresh(); }, 30e3);
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && Date.now() - state.lastMetaAt > 60e3) refresh(); });

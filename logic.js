@@ -98,8 +98,9 @@
   function statusText(f) {
     const s = f.status && f.status.short, el = f.status && f.status.elapsed, sc = f.score || {};
     if (FINISHED.includes(s)) return `${sc.home}-${sc.away}`;
-    if (s === "HT") return "MT";
-    if (LIVE.includes(s)) return el != null ? `${el}'` : "En cours";
+    const hs = sc.home != null && sc.away != null ? `${sc.home}-${sc.away} ` : "";
+    if (s === "HT") return `${hs}MT`;
+    if (LIVE.includes(s)) return hs + (el != null ? `${el}'` : "En cours");
     if (s === "PST") return "Reporté"; if (s === "CANC") return "Annulé"; if (s === "ABD") return "Arrêté";
     if (s === "AWD" || s === "WO") return "Tapis vert";
     return hm(f.kickoff);

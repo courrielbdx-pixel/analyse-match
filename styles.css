@@ -52,3 +52,4 @@ code{font-size:12px;overflow-wrap:anywhere}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 
 .time .ko{display:block;font-size:11px;font-weight:500;color:var(--mut)}
+.time .sc{display:block;font-size:15px}.time .mn{display:block;font-size:12px}

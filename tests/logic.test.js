@@ -54,3 +54,4 @@ test("résultat d'un pick", () => { assert.strictEqual(L.outcome("DC", "1X", 2, 
 test("données anciennes", () => { assert.strictEqual(L.staleText(new Date("2026-10-12T15:00:00+02:00"), "2026-10-12T10:00:00+02:00"), "5 h"); assert.strictEqual(L.staleText(new Date("2026-10-12T12:00:00+02:00"), "2026-10-12T10:00:00+02:00"), null); });
 test("schema_version", () => { assert.ok(L.schemaOk({ schema_version: "6.0" })); assert.ok(!L.schemaOk({ schema_version: "7.0" })); });
 test("heure exacte 16h15", () => { assert.strictEqual(L.hm("2026-10-12T16:15:00+02:00"), "16h15"); assert.strictEqual(L.statusText({ status: { short: "NS" }, kickoff: "2026-10-12T09:05:00+02:00" }), "9h05"); });
+test("live : score + minute", () => { assert.strictEqual(L.statusText({ status: { short: "2H", elapsed: 50 }, score: { home: 1, away: 0 } }), "1-0 50'"); assert.strictEqual(L.statusText({ status: { short: "HT" }, score: { home: 0, away: 0 } }), "0-0 MT"); });
