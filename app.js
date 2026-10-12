@@ -11,7 +11,7 @@
   const $app = document.getElementById("app");
   const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const REGIONS = [["toutes", "Toutes"], ["france", "France"], ["uefa", "UEFA"], ["europe", "Europe"], ["ameriques", "Amériques"], ["asie_oceanie", "Asie / Océanie"], ["monde", "Monde"]];
-  const TRIG = { matin: "Matin", compo: "Compo", manuel: "Manuel" };
+  const TRIG = { matin: "Matin", soir: "Soir", compo: "Compo", manuel: "Manuel" };
   // ---------------- stockage ----------------
   const LS = {
     get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
@@ -140,7 +140,7 @@
     return out.join("");
   }
   const fmtDT = d => { const p = L.paris(d); const dl = L.dayLabel(p.date); return `${dl.day} ${dl.month} ${p.time}`; };
-  const RUNT = { matin: "matin", compo: "compo", live: "live", reglement: "règlement", calendrier: "calendrier", manuel: "manuel" };
+  const RUNT = { matin: "matin", compo: "compo", live: "live", reglement: "règlement", calendrier: "calendrier", manuel: "manuel", soir: "soir" };
   function header() {
     const m = state.meta; let upd = "";
     if (m) { const g = new Date(m.generated_at); const ago = L.durationText(Math.max(0, now() - g)); upd = `Données mises à jour à ${L.paris(g).time} (${esc(RUNT[m.run && m.run.type] || m.run && m.run.type || "")}) · il y a ${ago}`; }
@@ -210,8 +210,10 @@
       <div class="teams"><div>${logo(f.home, "lgb")}<b>${esc(f.home.name)}</b></div>${sc}<div>${logo(f.away, "lgb")}<b>${esc(f.away.name)}</b></div></div>
       <div class="st">${esc(L.statusText(f))}${f.venue ? " · " + esc(f.venue) : ""}</div>${star(f)}</section>`;
     if (!r) {
-      const nx = state.meta && state.meta.next_runs && state.meta.next_runs.matin;
-      h += `<section class="card"><p>Pas encore analysé.${nx ? ` Prochaine lecture prévue : ${fmtDT(new Date(nx))}.` : ""}</p>${copyBtn(f)}</section>`;
+      const begun = f.status.short !== "NS" && f.status.short !== "TBD" || Date.parse(f.kickoff) <= now().getTime();
+      const nx = begun ? null : L.nextReading(f.kickoff, now());
+      const txt = begun ? "Non analysé (match commencé avant la lecture)." : `Pas encore analysé.${nx ? ` Prochaine lecture prévue : ${fmtDT(nx)}.` : ""}`;
+      h += `<section class="card"><p>${txt}</p>${copyBtn(f)}</section>`;
     } else {
       h += rapport(f, r, fr);
       h += history(fr.readings, r);

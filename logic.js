@@ -117,6 +117,16 @@
     const c = (a, b) => Date.parse(a.kickoff) - Date.parse(b.kickoff) || a.fixture_id - b.fixture_id;
     return { active: active.sort(c), archived: archived.sort(c), purge };
   }
+  function at(dateStr, hh) { return new Date(`${dateStr}T${String(hh).padStart(2, "0")}:00:00${offsetFor(dateStr)}`); }
+  // Prochaine lecture prévue : matin 07:00 (matchs de 07:00 à 07:00 le lendemain), soir 22:00 (matchs de la nuit jusqu'à 08:00)
+  function nextReading(kickoff, now) {
+    const k = new Date(kickoff), n = now || new Date(), p = paris(k); const c = [];
+    c.push(at(p.hour >= 7 ? p.date : addDays(p.date, -1), 7));
+    if (p.hour < 8) c.push(at(addDays(p.date, -1), 22));
+    if (p.hour >= 22) c.push(at(p.date, 22));
+    const ok = c.filter(r => r >= n && k - r >= 10 * 60e3).sort((a, b) => a - b);
+    return ok[0] || null;
+  }
   function offsetFor(dateStr) { // décalage Europe/Paris à midi ce jour-là
     const d = new Date(dateStr + "T12:00:00Z"); const p = paris(d); const diff = (p.hour - 12) * 60 + p.minute;
     const sgn = diff >= 0 ? "+" : "-", a = Math.abs(diff); return `${sgn}${String(Math.floor(a / 60)).padStart(2, "0")}:${String(a % 60).padStart(2, "0")}`;
@@ -187,7 +197,7 @@
     const ms = now.getTime() - Date.parse(gen); if (ms <= 3 * 3600e3) return null; return durationText(ms);
   }
   function durationText(ms) { const m = Math.round(ms / 60000); if (m < 60) return `${m} min`; const h = Math.floor(m / 60), r = m % 60; return r ? `${h} h ${String(r).padStart(2, "0")}` : `${h} h`; }
-  const API = { paris, addDays, dateBar, dayLabel, pct, units, odds, signedPct, nf, shortSel, affiches, heure, nuit, regionFilter, finalReading, recheck, outcome, mergeLive, statusText, hm,
+  const API = { paris, addDays, dateBar, dayLabel, pct, units, odds, signedPct, nf, shortSel, affiches, heure, nuit, regionFilter, finalReading, recheck, outcome, mergeLive, statusText, hm, nextReading,
     suivisSplit, exportSuivis, importSuivis, isoWeek, summarize, filterSettled, breakdown, calibration, cumulative, valueSentence, compareAggregates, paperCount, bucketOf,
     schemaOk, validFixture, staleText, durationText, offsetFor, FINISHED, LIVE };
   if (typeof module !== "undefined" && module.exports) module.exports = API; else root.AMLogic = API;
