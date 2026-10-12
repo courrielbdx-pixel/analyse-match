@@ -69,3 +69,10 @@ test("verrou TICKET : une relecture SKIP ne remplace pas le ticket publié", () 
   assert.strictEqual(L.laterReadings(fr)[0].reading_id, "a-r2");
   assert.strictEqual(L.finalReading({ readings: rs, cancelled: true }, "2026-10-12T20:45:00+02:00").reading.reading_id, "a-r2");
 });
+test("version : config.js = index.html (?v=) = sw.js par défaut", () => {
+  const fs = require("fs"), p = require("path"), dir = p.join(__dirname, "..");
+  const v = /APP_VERSION: "([^"]+)"/.exec(fs.readFileSync(p.join(dir, "config.js"), "utf8"))[1];
+  const html = fs.readFileSync(p.join(dir, "index.html"), "utf8");
+  for (const f of ["config.js", "logic.js", "app.js"]) assert.ok(html.includes(`${f}?v=${v}`), f);
+  assert.ok(fs.readFileSync(p.join(dir, "sw.js"), "utf8").includes(`"${v}"`));
+});

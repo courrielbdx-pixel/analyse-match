@@ -178,8 +178,8 @@
       let h = ""; body = `<ul class="list">` + hr.map(f => { const hh = L.hm(f.kickoff); const sep = hh !== h ? `<li class="sep">${hh}</li>` : ""; h = hh; return sep + row(f); }).join("") + `</ul>`;
       if (!hr.length) body += `<p class="empty">Aucun match.</p>`;
     } else if (prefs.view === "nuit") body = nt.length ? `<p class="sep">${nuitTitle}</p>` + list(nt) : "";
-    if ((prefs.view === "heure" || prefs.view === "affiches") && nt.length) body += `<h3 class="sep nuit">${nuitTitle}</h3>` + list(nt);
     else body = suivisView(act, arch);
+    if ((prefs.view === "heure" || prefs.view === "affiches") && nt.length) body += `<h3 class="sep nuit">${nuitTitle}</h3>` + list(nt);
     if ((prefs.view === "nuit" && !nt.length) || (prefs.view === "affiches" && !aff.rows.length)) body += `<p class="empty">Aucun match.</p>`;
     if (x.picks_status === 404 && prefs.view !== "suivis" && x.fixtures) body = `<p class="note">Lectures pas encore publiées pour le ${fmtDate(d)}.</p>` + body;
     $app.innerHTML = header() + `<nav class="dates" aria-label="Dates">${dates}</nav><div class="views">${views}</div><div class="filters">${regs}</div><section id="list">${body}</section>`;
@@ -489,7 +489,14 @@
   }
   setInterval(() => { if (document.visibilityState === "visible" && Date.now() - state.lastMetaAt >= interval()) refresh(); }, 30e3);
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && Date.now() - state.lastMetaAt > 60e3) refresh(); });
-  if ("serviceWorker" in navigator && location.protocol !== "file:") navigator.serviceWorker.register("sw.js").catch(() => {});
+  if ("serviceWorker" in navigator && location.protocol !== "file:") {
+    const hadCtl = !!navigator.serviceWorker.controller; let reloaded = false;
+    navigator.serviceWorker.addEventListener("controllerchange", () => { if (hadCtl && !reloaded) { reloaded = true; location.reload(); } });
+    navigator.serviceWorker.register("sw.js?v=" + C.APP_VERSION, { updateViaCache: "none" }).then(reg => {
+      reg.update().catch(() => {});
+      document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") reg.update().catch(() => {}); });
+    }).catch(() => {});
+  }
   document.addEventListener("error", e => { const i = e.target; if (i && i.tagName === "IMG" && i.dataset.ini != null) { const sp = document.createElement("span"); sp.className = i.className + " ini"; sp.textContent = i.dataset.ini; i.replaceWith(sp); } }, true);
   window.__AM = { state, diag, prefs, route };
   route();
