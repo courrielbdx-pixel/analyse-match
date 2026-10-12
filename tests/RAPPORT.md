@@ -1,6 +1,6 @@
 # Rapport de tests d'acceptation — v6.0.0
 
-Exécuté le 12/10/2026 17:06 (Europe/Paris), mode exemple sauf mention.
+Exécuté le 12/10/2026 17:24 (Europe/Paris), mode exemple sauf mention.
 
 | ID | Résultat | Méthode | Détail |
 |---|---|---|---|
@@ -41,7 +41,7 @@ TICKET → SKIP — Cote passée de 1,40 à 1,31 : EV sous 5 %. |
 | TA-34 | OK | test automatisé Playwright (Chromium 390×844) | ['+1,30 u', '+0,60 u', '−0,80 u', '−1,60 u'] ; somme T = +0,50 u = total |
 | TA-35 | OK | test automatisé Playwright (Chromium 390×844) | bandeau + détail dans /diagnostic |
 | TA-36 | KO | grep automatisé sur le code livré | 2 résultat(s), uniquement l’hôte des logos media.api-sports.io (ALLOWED_IMAGE_HOSTS/CSP) |
-| TA-37 | OK | Playwright + horloge simulée (pas 15 min réelles ; mode exemple, pas mode réel) | 15 min simulées (horloge Playwright), mode exemple : 4 lectures de meta.json (dont 2 échouées), , hôtes ['localhost:8765'] |
+| TA-37 | OK | Playwright + horloge simulée (pas 15 min réelles ; mode exemple, pas mode réel) | 15 min simulées (horloge Playwright), mode exemple : 4 lectures de meta.json (dont 4 échouées), , hôtes ['localhost:8765'] |
 | TA-38 | OK | Playwright + horloge simulée, visibilityState forcé | masqué 15 min : 0 requête ; au retour : 1 meta.json |
 | TA-39 | OK | test automatisé Playwright (Chromium 390×844) (context.set_offline + service worker) | hors ligne : 10 lignes affichées |
 | TA-40 | OK | test automatisé Playwright (Chromium 390×844) (?data=empty → dossier inexistant, 404) | 10 |

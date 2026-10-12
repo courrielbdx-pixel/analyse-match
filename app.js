@@ -299,7 +299,7 @@
       <label>Période <select id="period">${[["7", "7 jours"], ["30", "30 jours"], ["debut", "Depuis le début de la méthode"], ["perso", "Plage personnalisée"]].map(([k, n]) => `<option value="${k}"${k === per ? " selected" : ""}>${n}</option>`).join("")}</select></label>
       ${per === "perso" ? `<label>Du <input type="date" id="pfrom" value="${esc(prefs.pfrom || mh.from)}"></label><label>Au <input type="date" id="pto" value="${esc(prefs.pto || today)}"></label>` : ""}</div>`;
     let h = `<h2 class="pt">Bilan</h2>${sel}`;
-    if (paperN < th.paper_min_tickets) h += `<div class="banner paper">Mode papier — échantillon insuffisant : ${paperN} / ${th.paper_min_tickets} tickets réglés. Ne pas considérer ces résultats comme une preuve.<div class="prog" role="progressbar" aria-valuemin="0" aria-valuemax="${th.paper_min_tickets}" aria-valuenow="${paperN}"><i style="width:${Math.min(100, paperN / th.paper_min_tickets * 100)}%"></i></div></div>`;
+    if (paperN < th.paper_min_tickets) h += `<div class="banner paper">Mode papier — échantillon insuffisant : ${paperN} / ${th.paper_min_tickets} tickets réglés. Ne pas considérer ces résultats comme une preuve.<div class="prog" role="progressbar" aria-valuemin="0" aria-valuemax="${th.paper_min_tickets}" aria-valuenow="${paperN}"><i data-w="${Math.min(100, paperN / th.paper_min_tickets * 100)}"></i></div></div>`;
     if (per === "debut") {
       const diffs = L.compareAggregates(L.summarize(L.filterSettled(r.data.settled, mv, null, null).filter(x => x.label === "TICKET")), L.summarize(L.filterSettled(r.data.settled, mv, null, null).filter(x => x.label === "SKIP")), r.data.aggregates && r.data.aggregates[mv]);
       diag.bilanDiff = diffs.map(x => `${mv} ${x.field} : ${x.detail}`);
@@ -310,7 +310,7 @@
     const day = d => { const z = all.filter(x => x.date === d); if (!z.length) return "Aucun pick réglé"; const t = L.summarize(z.filter(x => x.label === "TICKET")), s = L.summarize(z.filter(x => x.label === "SKIP"));
       return `Tickets ${t.n} (${t.won} G / ${t.lost} P, ${L.units(t.pl_units)}) · Skips ${s.n} (${s.won} G / ${s.lost} P, ${L.units(s.pl_units)})`; };
     h += `<section class="card"><p><b>Hier (${fmtFr(yd)})</b> : ${day(yd)}</p><p><b>Aujourd'hui</b> : ${day(today)}</p></section>`;
-    if (!xs.length) { h += `<p class="empty">Aucun pick réglé pour ${esc(mv)} depuis le ${fmtFr(from || mh.from)}. Le bilan se remplira après les premiers matchs.</p>`; $app.innerHTML = header() + h + howTo(); return; }
+    if (!xs.length) { h += `<p class="empty">Aucun pick réglé pour ${esc(mv)} depuis le ${fmtFr(from || mh.from)}. Le bilan se remplira après les premiers matchs.</p>`; $app.innerHTML = header() + h + howTo(); setW(); return; }
     const card = (t, s, cls) => `<div class="kpi ${cls}"><h3>${t}</h3><dl>
       <dt>Réglés</dt><dd data-k="n">${s.n}</dd><dt>Gagnés</dt><dd data-k="won">${s.won}</dd><dt>Perdus</dt><dd data-k="lost">${s.lost}</dd><dt>Annulés</dt><dd data-k="void">${s.void}</dd>
       <dt>Réussite</dt><dd data-k="hit">${L.pct(s.hit_rate)} <small>sur ${s.won + s.lost}</small></dd><dt>P/L</dt><dd data-k="pl">${L.units(s.pl_units)}</dd>
@@ -330,7 +330,7 @@
     h += tb("Par jour", L.breakdown(xs, x => x.date), "Jour");
     h += tb("Par semaine", L.breakdown(xs, x => L.isoWeek(x.date)), "Semaine");
     h += settledList(xs) + howTo();
-    $app.innerHTML = header() + h;
+    $app.innerHTML = header() + h; setW();
   }
   const maxd = (a, b) => (!a ? b : a > b ? a : b);
   const fmtFr = d => d ? d.split("-").reverse().join("/") : "—";
@@ -389,7 +389,7 @@
       h += `<section class="card"><h3>Compétitions et zones exclues</h3><p>${(m.exclusions || []).map(esc).join(", ")}</p></section>`;
     }
     h += `<section class="card"><h3>À propos</h3><p>Le site affiche les lectures publiées par Grok Bot ; il n'analyse rien, ne modifie aucun pick et n'appelle aucune API de football. Les suivis (étoiles) restent sur cet appareil.</p><p><b>Ce n'est pas un conseil de pari.</b></p></section>`;
-    $app.innerHTML = header() + h;
+    $app.innerHTML = header() + h; setW();
   }
   function diagPage() {
     let size = 0; try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); size += (k.length + (localStorage.getItem(k) || "").length) * 2; } } catch (e) {}
@@ -466,6 +466,7 @@
   });
   window.addEventListener("hashchange", e => { const o = e.oldURL && e.oldURL.indexOf("#") >= 0 ? e.oldURL.slice(e.oldURL.indexOf("#")) : ""; if (!/^#\/match/.test(o)) state.prevHash = o; route(); });
   // ---------------- rafraîchissement (EXG-71) ----------------
+  function setW() { document.querySelectorAll("[data-w]").forEach(e => { e.style.width = e.dataset.w + "%"; }); }
   async function refresh() {
     if (document.visibilityState !== "visible") return;
     const before = state.meta && state.meta.files ? JSON.stringify(state.meta.files) : ""; const prevGen = state.meta && state.meta.generated_at;
