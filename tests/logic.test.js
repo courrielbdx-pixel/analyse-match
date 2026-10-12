@@ -61,3 +61,11 @@ test("prochaine lecture : nuit → 22:00 la veille, jour → 07:00", () => {
   assert.strictEqual(L.nextReading("2026-10-13T20:45:00+02:00", n).toISOString(), new Date("2026-10-13T07:00:00+02:00").toISOString());
   assert.strictEqual(L.nextReading("2026-10-12T21:00:00+02:00", n), null);
 });
+test("verrou TICKET : une relecture SKIP ne remplace pas le ticket publié", () => {
+  const rs = [{ reading_id: "a-r1", timestamp: "2026-10-12T16:48:00+02:00", label: "TICKET", lineups_confirmed: false, pick: {} },
+              { reading_id: "a-r2", timestamp: "2026-10-12T20:25:00+02:00", label: "SKIP", lineups_confirmed: true, pick: {} }];
+  const fr = L.finalReading({ readings: rs }, "2026-10-12T20:45:00+02:00");
+  assert.strictEqual(fr.reading.reading_id, "a-r1");
+  assert.strictEqual(L.laterReadings(fr)[0].reading_id, "a-r2");
+  assert.strictEqual(L.finalReading({ readings: rs, cancelled: true }, "2026-10-12T20:45:00+02:00").reading.reading_id, "a-r2");
+});

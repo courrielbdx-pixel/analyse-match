@@ -45,12 +45,14 @@
     const ko = Date.parse(kickoff);
     const before = rs.filter(r => Date.parse(r.timestamp) < ko);
     const conf = before.filter(r => r.lineups_confirmed);
-    const rule = conf.length ? conf[conf.length - 1] : (before.length ? before[before.length - 1] : null);
+    const tk = before.filter(r => r.label === "TICKET"); // verrou : un TICKET publié reste officiel
+    const rule = tk.length && !(entry && entry.cancelled) ? tk[0] : conf.length ? conf[conf.length - 1] : (before.length ? before[before.length - 1] : null);
     const pub = entry && entry.final_reading_id ? rs.find(r => r.reading_id === entry.final_reading_id) : null;
     if (!entry || !entry.final_reading_id) return { reading: rule, anomaly: "final_reading_id absent : lecture finale déterminée par la règle", readings: rs };
     if (!pub) return { reading: rule, anomaly: `final_reading_id ${entry.final_reading_id} inexistant : règle appliquée`, readings: rs };
     return { reading: pub, anomaly: null, readings: rs };
   }
+  function laterReadings(fr) { const r = fr && fr.reading; if (!r) return []; return (fr.readings || []).filter(x => Date.parse(x.timestamp) > Date.parse(r.timestamp) && x.reading_id !== r.reading_id); }
   // ---- revérification cohérence (COH-01, 02, 03, 04, 07) ----
   function recheck(r, rules) {
     const fails = []; const P = r.probabilities || {}; const m = r.pick && r.pick.market, s = r.pick && r.pick.selection;
@@ -197,7 +199,7 @@
     const ms = now.getTime() - Date.parse(gen); if (ms <= 3 * 3600e3) return null; return durationText(ms);
   }
   function durationText(ms) { const m = Math.round(ms / 60000); if (m < 60) return `${m} min`; const h = Math.floor(m / 60), r = m % 60; return r ? `${h} h ${String(r).padStart(2, "0")}` : `${h} h`; }
-  const API = { paris, addDays, dateBar, dayLabel, pct, units, odds, signedPct, nf, shortSel, affiches, heure, nuit, regionFilter, finalReading, recheck, outcome, mergeLive, statusText, hm, nextReading,
+  const API = { paris, addDays, dateBar, dayLabel, pct, units, odds, signedPct, nf, shortSel, affiches, heure, nuit, regionFilter, finalReading, recheck, outcome, mergeLive, statusText, hm, nextReading, laterReadings,
     suivisSplit, exportSuivis, importSuivis, isoWeek, summarize, filterSettled, breakdown, calibration, cumulative, valueSentence, compareAggregates, paperCount, bucketOf,
     schemaOk, validFixture, staleText, durationText, offsetFor, FINISHED, LIVE };
   if (typeof module !== "undefined" && module.exports) module.exports = API; else root.AMLogic = API;

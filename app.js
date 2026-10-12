@@ -232,6 +232,8 @@
       <p><span class="tip" title="Probabilité calculée par le modèle Dixon-Coles pour cette sélection. Ce n'est pas une garantie.">Probabilité du modèle : ${L.pct(r.model_probability)}</span></p>
       <p class="muted">${esc(TRIG[r.trigger] || r.trigger)} · ${L.paris(r.timestamp).time} · Compos officielles : ${r.lineups_confirmed ? "oui" : "non"}</p>`;
     if (!hasCompo && ko > 0 && ko < 90 * 60e3 && fr.readings.some(x => x.trigger === "matin")) h += `<p class="note">En attente des compos officielles (relecture automatique par Grok Bot)</p>`;
+    const lat = r.label === "TICKET" ? L.laterReadings(fr) : [];
+    if (lat.length) { const x = lat[lat.length - 1]; h += `<p class="muted relect">Relecture (info) ${L.paris(x.timestamp).time} : ${x.label} ${esc(x.pick.label_fr)} (${L.pct(x.model_probability)}) — le ticket officiel reste ${esc(r.pick.label_fr)}.</p>`; }
     if (r.label === "SKIP" && (r.skip_reasons_fr || []).length) h += `<ul class="reasons">${r.skip_reasons_fr.map(x => `<li>${esc(x)}</li>`).join("")}</ul>`;
     if ((r.reasoning_fr || []).length) h += `<ul class="reasoning">${r.reasoning_fr.slice(0, 3).map(x => `<li>${esc(x)}</li>`).join("")}</ul>`;
     if (r.web_check && (r.web_check.items_fr || []).length) h += `<div class="web"><h3>Vérification web</h3><ul>${r.web_check.items_fr.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>`;
