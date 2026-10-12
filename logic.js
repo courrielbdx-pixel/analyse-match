@@ -102,8 +102,9 @@
     if (LIVE.includes(s)) return el != null ? `${el}'` : "En cours";
     if (s === "PST") return "Reporté"; if (s === "CANC") return "Annulé"; if (s === "ABD") return "Arrêté";
     if (s === "AWD" || s === "WO") return "Tapis vert";
-    return paris(f.kickoff).time;
+    return hm(f.kickoff);
   }
+  function hm(k) { const p = paris(k); return `${p.hour}h${String(p.minute).padStart(2, "0")}`; }
   // ---- suivis ----
   function suivisSplit(suivis, now) {
     const today8 = Date.parse(paris(now).date + "T08:00:00" + offsetFor(paris(now).date));
@@ -185,7 +186,7 @@
     const ms = now.getTime() - Date.parse(gen); if (ms <= 3 * 3600e3) return null; return durationText(ms);
   }
   function durationText(ms) { const m = Math.round(ms / 60000); if (m < 60) return `${m} min`; const h = Math.floor(m / 60), r = m % 60; return r ? `${h} h ${String(r).padStart(2, "0")}` : `${h} h`; }
-  const API = { paris, addDays, dateBar, dayLabel, pct, units, odds, signedPct, nf, shortSel, affiches, heure, nuit, regionFilter, finalReading, recheck, outcome, mergeLive, statusText,
+  const API = { paris, addDays, dateBar, dayLabel, pct, units, odds, signedPct, nf, shortSel, affiches, heure, nuit, regionFilter, finalReading, recheck, outcome, mergeLive, statusText, hm,
     suivisSplit, exportSuivis, importSuivis, isoWeek, summarize, filterSettled, breakdown, calibration, cumulative, valueSentence, compareAggregates, paperCount, bucketOf,
     schemaOk, validFixture, staleText, durationText, offsetFor, FINISHED, LIVE };
   if (typeof module !== "undefined" && module.exports) module.exports = API; else root.AMLogic = API;

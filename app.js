@@ -120,7 +120,7 @@
     if (fin && r) { const o = L.outcome(r.pick.market, r.pick.selection, f.score.home, f.score.away); res = o === "won" ? `<span class="res ok" aria-label="pick gagné">✓</span>` : o === "lost" ? `<span class="res ko" aria-label="pick perdu">✗</span>` : ""; }
     return `<li class="row" data-open="${f.fixture_id}" data-date="${f._date}">
       <a class="rowlink" href="#/match/${f.fixture_id}?d=${f._date}">
-        <span class="time${live ? " live" : ""}${fin ? " fin" : ""}">${esc(L.statusText(f))}</span>
+        <span class="time${live ? " live" : ""}${fin ? " fin" : ""}">${esc(L.statusText(f))}${(live || fin || f.status.short === "HT") ? `<span class="ko">${L.hm(f.kickoff)}</span>` : ""}</span>
         <span class="mid">
           <span class="lgl"><span class="cc">${esc(f.league.country_code || "")}</span> ${leagueLabel(f)}${une ? ` <span class="une">À la une</span>` : ""}</span>
           <span class="tm">${logo(f.home)}<span class="nm">${esc(f.home.name)}</span></span>
@@ -172,7 +172,7 @@
       if (aff.available < prefs.n) body += `<p class="note">${aff.available} affiches disponibles (sur ${prefs.n} demandées)</p>`;
       body += list(aff.rows, aff.une);
     } else if (prefs.view === "heure") {
-      let h = -1; body = `<ul class="list">` + hr.map(f => { const hh = L.paris(f.kickoff).hour; const sep = hh !== h ? `<li class="sep">${hh}h</li>` : ""; h = hh; return sep + row(f); }).join("") + `</ul>`;
+      let h = ""; body = `<ul class="list">` + hr.map(f => { const hh = L.hm(f.kickoff); const sep = hh !== h ? `<li class="sep">${hh}</li>` : ""; h = hh; return sep + row(f); }).join("") + `</ul>`;
       if (!hr.length) body += `<p class="empty">Aucun match.</p>`;
     } else if (prefs.view === "nuit") body = list(nt) || "";
     else body = suivisView(act, arch);
