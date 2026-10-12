@@ -1,0 +1,193 @@
+{
+ "schema_version": "6.0",
+ "generated_at": "2026-10-12T10:00:00+02:00",
+ "date": "2026-10-13",
+ "timezone": "Europe/Paris",
+ "fixtures": [
+  {
+   "fixture_id": 1051,
+   "kickoff": "2026-10-13T01:10:00+02:00",
+   "timezone": "Europe/Paris",
+   "league": {
+    "id": 103,
+    "name": "Liga Profesional",
+    "country": "Argentine",
+    "country_code": "AR",
+    "round": "Journée 7",
+    "logo": "sample-data/logos/team.svg"
+   },
+   "region": "ameriques",
+   "tier": 2,
+   "affiche_score": 50,
+   "bettable": true,
+   "home": {
+    "id": 10510,
+    "name": "Domicile 1051",
+    "logo": "sample-data/logos/team.svg"
+   },
+   "away": {
+    "id": 10511,
+    "name": "Extérieur 1051",
+    "logo": "sample-data/logos/team.svg"
+   },
+   "venue": "Stade d'exemple, Ville",
+   "status": {
+    "short": "NS",
+    "elapsed": null
+   },
+   "score": {
+    "home": null,
+    "away": null
+   },
+   "has_details": false
+  },
+  {
+   "fixture_id": 1052,
+   "kickoff": "2026-10-13T02:30:00+02:00",
+   "timezone": "Europe/Paris",
+   "league": {
+    "id": 103,
+    "name": "Liga Profesional",
+    "country": "Argentine",
+    "country_code": "AR",
+    "round": "Journée 7",
+    "logo": "sample-data/logos/team.svg"
+   },
+   "region": "ameriques",
+   "tier": 2,
+   "affiche_score": 51,
+   "bettable": true,
+   "home": {
+    "id": 10520,
+    "name": "Domicile 1052",
+    "logo": "sample-data/logos/team.svg"
+   },
+   "away": {
+    "id": 10521,
+    "name": "Extérieur 1052",
+    "logo": "sample-data/logos/team.svg"
+   },
+   "venue": "Stade d'exemple, Ville",
+   "status": {
+    "short": "NS",
+    "elapsed": null
+   },
+   "score": {
+    "home": null,
+    "away": null
+   },
+   "has_details": false
+  },
+  {
+   "fixture_id": 1053,
+   "kickoff": "2026-10-13T18:00:00+02:00",
+   "timezone": "Europe/Paris",
+   "league": {
+    "id": 102,
+    "name": "Serie A",
+    "country": "Italie",
+    "country_code": "IT",
+    "round": "Journée 7",
+    "logo": "sample-data/logos/team.svg"
+   },
+   "region": "europe",
+   "tier": 2,
+   "affiche_score": 70,
+   "bettable": true,
+   "home": {
+    "id": 10530,
+    "name": "Domicile 1053",
+    "logo": "sample-data/logos/team.svg"
+   },
+   "away": {
+    "id": 10531,
+    "name": "Extérieur 1053",
+    "logo": "sample-data/logos/team.svg"
+   },
+   "venue": "Stade d'exemple, Ville",
+   "status": {
+    "short": "NS",
+    "elapsed": null
+   },
+   "score": {
+    "home": null,
+    "away": null
+   },
+   "has_details": false
+  },
+  {
+   "fixture_id": 1054,
+   "kickoff": "2026-10-13T20:45:00+02:00",
+   "timezone": "Europe/Paris",
+   "league": {
+    "id": 100,
+    "name": "Ligue 1",
+    "country": "France",
+    "country_code": "FR",
+    "round": "Journée 7",
+    "logo": "sample-data/logos/team.svg"
+   },
+   "region": "france",
+   "tier": 2,
+   "affiche_score": 85,
+   "bettable": true,
+   "home": {
+    "id": 10540,
+    "name": "Domicile 1054",
+    "logo": "sample-data/logos/team.svg"
+   },
+   "away": {
+    "id": 10541,
+    "name": "Extérieur 1054",
+    "logo": "sample-data/logos/team.svg"
+   },
+   "venue": "Stade d'exemple, Ville",
+   "status": {
+    "short": "NS",
+    "elapsed": null
+   },
+   "score": {
+    "home": null,
+    "away": null
+   },
+   "has_details": false
+  },
+  {
+   "fixture_id": 1055,
+   "kickoff": "2026-10-13T21:00:00+02:00",
+   "timezone": "Europe/Paris",
+   "league": {
+    "id": 101,
+    "name": "Ligue des champions",
+    "country": "Europe",
+    "country_code": "EU",
+    "round": "Journée 7",
+    "logo": "sample-data/logos/team.svg"
+   },
+   "region": "uefa",
+   "tier": 2,
+   "affiche_score": 90,
+   "bettable": true,
+   "home": {
+    "id": 10550,
+    "name": "Domicile 1055",
+    "logo": "sample-data/logos/team.svg"
+   },
+   "away": {
+    "id": 10551,
+    "name": "Extérieur 1055",
+    "logo": "sample-data/logos/team.svg"
+   },
+   "venue": "Stade d'exemple, Ville",
+   "status": {
+    "short": "NS",
+    "elapsed": null
+   },
+   "score": {
+    "home": null,
+    "away": null
+   },
+   "has_details": false
+  }
+ ]
+}

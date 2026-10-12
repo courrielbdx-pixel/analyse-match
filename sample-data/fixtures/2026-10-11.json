@@ -1,0 +1,119 @@
+{
+ "schema_version": "6.0",
+ "generated_at": "2026-10-12T10:00:00+02:00",
+ "date": "2026-10-11",
+ "timezone": "Europe/Paris",
+ "fixtures": [
+  {
+   "fixture_id": 1048,
+   "kickoff": "2026-10-11T15:00:00+02:00",
+   "timezone": "Europe/Paris",
+   "league": {
+    "id": 102,
+    "name": "Serie A",
+    "country": "Italie",
+    "country_code": "IT",
+    "round": "Journée 7",
+    "logo": "sample-data/logos/team.svg"
+   },
+   "region": "europe",
+   "tier": 2,
+   "affiche_score": 70,
+   "bettable": true,
+   "home": {
+    "id": 10480,
+    "name": "Domicile 1048",
+    "logo": "sample-data/logos/team.svg"
+   },
+   "away": {
+    "id": 10481,
+    "name": "Extérieur 1048",
+    "logo": "sample-data/logos/team.svg"
+   },
+   "venue": "Stade d'exemple, Ville",
+   "status": {
+    "short": "NS",
+    "elapsed": null
+   },
+   "score": {
+    "home": null,
+    "away": null
+   },
+   "has_details": false
+  },
+  {
+   "fixture_id": 1049,
+   "kickoff": "2026-10-11T21:00:00+02:00",
+   "timezone": "Europe/Paris",
+   "league": {
+    "id": 100,
+    "name": "Ligue 1",
+    "country": "France",
+    "country_code": "FR",
+    "round": "Journée 7",
+    "logo": "sample-data/logos/team.svg"
+   },
+   "region": "france",
+   "tier": 2,
+   "affiche_score": 80,
+   "bettable": true,
+   "home": {
+    "id": 10490,
+    "name": "Domicile 1049",
+    "logo": "sample-data/logos/team.svg"
+   },
+   "away": {
+    "id": 10491,
+    "name": "Extérieur 1049",
+    "logo": "sample-data/logos/team.svg"
+   },
+   "venue": "Stade d'exemple, Ville",
+   "status": {
+    "short": "NS",
+    "elapsed": null
+   },
+   "score": {
+    "home": null,
+    "away": null
+   },
+   "has_details": false
+  },
+  {
+   "fixture_id": 1050,
+   "kickoff": "2026-10-11T23:59:00+02:00",
+   "timezone": "Europe/Paris",
+   "league": {
+    "id": 103,
+    "name": "Liga Profesional",
+    "country": "Argentine",
+    "country_code": "AR",
+    "round": "Journée 7",
+    "logo": "sample-data/logos/team.svg"
+   },
+   "region": "ameriques",
+   "tier": 2,
+   "affiche_score": 60,
+   "bettable": true,
+   "home": {
+    "id": 10500,
+    "name": "Domicile 1050",
+    "logo": "sample-data/logos/team.svg"
+   },
+   "away": {
+    "id": 10501,
+    "name": "Extérieur 1050",
+    "logo": "sample-data/logos/team.svg"
+   },
+   "venue": "Stade d'exemple, Ville",
+   "status": {
+    "short": "NS",
+    "elapsed": null
+   },
+   "score": {
+    "home": null,
+    "away": null
+   },
+   "has_details": false
+  }
+ ]
+}

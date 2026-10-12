@@ -1,0 +1,6 @@
+.env
+*.env
+cache/
+api_cache/
+grok_conversation.txt
+__pycache__/

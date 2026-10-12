@@ -1,0 +1,19 @@
+{
+ "schema_version": "6.0",
+ "generated_at": "2026-10-12T11:58:00+02:00",
+ "date": "2026-10-12",
+ "live": [
+  {
+   "fixture_id": 1016,
+   "status": {
+    "short": "2H",
+    "elapsed": 62
+   },
+   "score": {
+    "home": 1,
+    "away": 0
+   },
+   "updated_at": "2026-10-12T11:58:00+02:00"
+  }
+ ]
+}

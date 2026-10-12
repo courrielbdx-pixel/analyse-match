@@ -1,0 +1,82 @@
+{
+ "schema_version": "6.0",
+ "generated_at": "2026-10-12T10:00:00+02:00",
+ "date": "2026-10-25",
+ "timezone": "Europe/Paris",
+ "fixtures": [
+  {
+   "fixture_id": 1056,
+   "kickoff": "2026-10-25T15:00:00+01:00",
+   "timezone": "Europe/Paris",
+   "league": {
+    "id": 102,
+    "name": "Serie A",
+    "country": "Italie",
+    "country_code": "IT",
+    "round": "Journée 7",
+    "logo": "sample-data/logos/team.svg"
+   },
+   "region": "europe",
+   "tier": 2,
+   "affiche_score": 70,
+   "bettable": true,
+   "home": {
+    "id": 10560,
+    "name": "Domicile 1056",
+    "logo": "sample-data/logos/team.svg"
+   },
+   "away": {
+    "id": 10561,
+    "name": "Extérieur 1056",
+    "logo": "sample-data/logos/team.svg"
+   },
+   "venue": "Stade d'exemple, Ville",
+   "status": {
+    "short": "NS",
+    "elapsed": null
+   },
+   "score": {
+    "home": null,
+    "away": null
+   },
+   "has_details": false
+  },
+  {
+   "fixture_id": 1057,
+   "kickoff": "2026-10-25T14:00:00+00:00",
+   "timezone": "Europe/Paris",
+   "league": {
+    "id": 100,
+    "name": "Ligue 1",
+    "country": "France",
+    "country_code": "FR",
+    "round": "Journée 7",
+    "logo": "sample-data/logos/team.svg"
+   },
+   "region": "france",
+   "tier": 2,
+   "affiche_score": 72,
+   "bettable": true,
+   "home": {
+    "id": 10570,
+    "name": "Domicile 1057",
+    "logo": "sample-data/logos/team.svg"
+   },
+   "away": {
+    "id": 10571,
+    "name": "Extérieur 1057",
+    "logo": "sample-data/logos/team.svg"
+   },
+   "venue": "Stade d'exemple, Ville",
+   "status": {
+    "short": "NS",
+    "elapsed": null
+   },
+   "score": {
+    "home": null,
+    "away": null
+   },
+   "has_details": false
+  }
+ ]
+}

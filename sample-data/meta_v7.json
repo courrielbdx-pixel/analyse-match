@@ -1,0 +1,117 @@
+{
+ "schema_version": "7.0",
+ "generated_at": "2026-10-12T10:00:00+02:00",
+ "run": {
+  "id": "2026-10-12T07:00-matin",
+  "type": "matin",
+  "finished_at": "2026-10-12T10:00:00+02:00"
+ },
+ "engine_status": {
+  "level": "ok",
+  "message_fr": null
+ },
+ "method": {
+  "version": "dc-v1",
+  "name": "Dixon-Coles v1",
+  "since": "2026-10-12",
+  "description_fr": "Modèle Dixon-Coles sans cotes en entrée."
+ },
+ "methods_history": [
+  {
+   "version": "dc-v0",
+   "from": "2026-09-01",
+   "to": "2026-10-11",
+   "description_fr": "Version d'essai"
+  },
+  {
+   "version": "dc-v1",
+   "from": "2026-10-12",
+   "to": null,
+   "description_fr": "Dixon-Coles v1"
+  }
+ ],
+ "rules": {
+  "text_fr": [
+   "Probabilités : modèle Dixon-Coles uniquement, sans les cotes en entrée.",
+   "Un seul pick par match et par lecture."
+  ],
+  "ticket_criteria": {
+   "min_ev": 0.05,
+   "max_gap_market": 0.05,
+   "min_prob": 0.55,
+   "max_odds": 3.5,
+   "min_team_matches": 20
+  },
+  "allowed_markets": [
+   "1X2",
+   "DC",
+   "OU1.5",
+   "OU2.5",
+   "OU3.5",
+   "BTTS",
+   "1X_O1.5",
+   "1X_BTTS",
+   "BTTS_O2.5"
+  ]
+ },
+ "thresholds": {
+  "paper_min_tickets": 300,
+  "min_sample_display": 30
+ },
+ "dates_available": [
+  "2026-10-10",
+  "2026-10-11",
+  "2026-10-12",
+  "2026-10-13",
+  "2026-10-14",
+  "2026-10-15",
+  "2026-10-16",
+  "2026-10-17",
+  "2026-10-25"
+ ],
+ "files": {
+  "2026-10-10": {
+   "fixtures": "2026-10-12T10:00:00+02:00"
+  },
+  "2026-10-11": {
+   "fixtures": "2026-10-12T10:00:00+02:00"
+  },
+  "2026-10-12": {
+   "fixtures": "2026-10-12T07:03:00+02:00",
+   "picks": "2026-10-12T07:50:30+02:00",
+   "live": "2026-10-12T11:58:00+02:00"
+  },
+  "2026-10-13": {
+   "fixtures": "2026-10-12T10:00:00+02:00"
+  },
+  "2026-10-14": {
+   "fixtures": "2026-10-12T10:00:00+02:00"
+  },
+  "2026-10-15": {
+   "fixtures": "2026-10-12T10:00:00+02:00"
+  },
+  "2026-10-16": {
+   "fixtures": "2026-10-12T10:00:00+02:00"
+  },
+  "2026-10-17": {
+   "fixtures": "2026-10-12T10:00:00+02:00"
+  },
+  "2026-10-25": {
+   "fixtures": "2026-10-12T10:00:00+02:00"
+  }
+ },
+ "next_runs": {
+  "matin": "2026-10-13T07:00:00+02:00",
+  "calendrier": "2026-10-12T19:00:00+02:00"
+ },
+ "api_usage": {
+  "date": "2026-10-12",
+  "used": 1840,
+  "limit": 7500,
+  "plan_expires": "2026-10-16"
+ },
+ "exclusions": [
+  "Afrique",
+  "Moyen-Orient"
+ ]
+}

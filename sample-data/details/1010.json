@@ -1,0 +1,9 @@
+{
+ "schema_version": "6.0",
+ "generated_at": "2026-10-12T10:00:00+02:00",
+ "fixture_id": 1010,
+ "rest_days": {
+  "home": 4,
+  "away": 4
+ }
+}

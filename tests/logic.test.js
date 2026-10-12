@@ -1,0 +1,55 @@
+// node --test tests/  — tests de la logique pure sur /sample-data
+const test = require("node:test"), assert = require("node:assert");
+const fs = require("fs"), path = require("path");
+const L = require("../logic.js");
+const SD = p => JSON.parse(fs.readFileSync(path.join(__dirname, "..", "sample-data", p)));
+const ids = JSON.parse(fs.readFileSync(path.join(__dirname, "ids.json")));
+const F12 = SD("fixtures/2026-10-12.json").fixtures, F13 = SD("fixtures/2026-10-13.json").fixtures, F11 = SD("fixtures/2026-10-11.json").fixtures;
+const picks = Object.fromEntries(SD("picks/2026-10-12.json").picks.map(p => [p.fixture_id, p]));
+const meta = SD("meta.json"), bilan = SD("results/bilan.json");
+const kick = id => F12.find(f => f.fixture_id === id).kickoff;
+test("barre des dates J-2..J+5", () => assert.deepStrictEqual(L.dateBar(new Date("2026-10-12T12:00:00+02:00")), ["2026-10-10","2026-10-11","2026-10-12","2026-10-13","2026-10-14","2026-10-15","2026-10-16","2026-10-17"]));
+test("affiches 10/20/30 exactes et emboîtées", () => {
+  const a = [10, 20, 30].map(n => L.affiches(F12, "2026-10-12", "toutes", n));
+  assert.deepStrictEqual(a.map(x => x.rows.length), [10, 20, 30]);
+  for (const x of a) for (const f of x.rows) assert.ok(L.paris(f.kickoff).hour >= 8);
+  const s = x => new Set(x.rows.map(f => f.fixture_id)); for (const id of s(a[0])) assert.ok(s(a[1]).has(id)); for (const id of s(a[1])) assert.ok(s(a[2]).has(id));
+  const t = a[0].rows.map(f => Date.parse(f.kickoff)); assert.deepStrictEqual(t, t.slice().sort((x, y) => x - y));
+});
+test("affiches France = 8 disponibles", () => { const a = L.affiches(F12, "2026-10-12", "france", 10); assert.strictEqual(a.rows.length, 8); assert.strictEqual(a.available, 8); });
+test("égalité affiche_score : tier le plus petit devant", () => { const r = L.affiches(F12, "2026-10-12", "toutes", 30).ranked.map(f => f.fixture_id); assert.ok(r.indexOf(ids.TIE_T1) < r.indexOf(ids.TIE_T3)); });
+test("nuit 12/10 = 6 matchs", () => assert.deepStrictEqual(L.nuit(F12, "2026-10-12", "toutes").map(f => L.paris(f.kickoff).time), ["00:00","01:10","02:30","03:15","05:00","07:59"]));
+test("nuit 13/10 contient 02:30 et pas ceux du 12", () => { const n = L.nuit(F13, "2026-10-13", "toutes").map(f => L.paris(f.kickoff).time); assert.ok(n.includes("02:30")); assert.strictEqual(L.nuit(F11, "2026-10-12", "toutes").length, 0); });
+test("heure = 45 pariables, régions", () => { const h = L.heure(F12, "2026-10-12", "toutes"); assert.strictEqual(h.length, 45); const c = {}; h.forEach(f => c[f.region] = (c[f.region] || 0) + 1);
+  assert.deepStrictEqual(c, { ameriques: 9, asie_oceanie: 4, europe: 15, france: 8, uefa: 6, monde: 3 }); });
+test("changement d'heure 25/10 : deux matchs à 15:00", () => SD("fixtures/2026-10-25.json").fixtures.forEach(f => assert.strictEqual(L.paris(f.kickoff).time, "15:00")));
+test("lecture finale : 4 lectures -> 2e manuel", () => { const r = L.finalReading(picks[ids.A], kick(ids.A)); assert.strictEqual(r.reading.reading_id, `${ids.A}-r4`); assert.strictEqual(r.reading.label, "SKIP"); });
+test("lecture finale : compo puis manuel sans compo -> compo", () => assert.strictEqual(L.finalReading(picks[ids.B], kick(ids.B)).reading.trigger, "compo"));
+test("lecture finale : final_reading_id absent -> règle + anomalie", () => { const r = L.finalReading(picks[ids.C], kick(ids.C)); assert.ok(r.reading); assert.ok(r.anomaly); });
+test("COH-01 détecté malgré passed:true", () => { const r = picks[ids.D].readings[0]; assert.ok(L.recheck(r, meta.rules).fails.some(f => f.id === "COH-01")); });
+test("COH-04 détecté (ev 0,031)", () => { const r = picks[ids.F].readings[0]; assert.ok(L.recheck(r, meta.rules).fails.some(f => f.id === "COH-04")); });
+test("lecture normale cohérente", () => { const r = picks[ids.B].readings[0]; assert.ok(L.recheck(r, meta.rules).ok); });
+test("bilan dc-v1 valeurs 14.2", () => {
+  const xs = L.filterSettled(bilan.settled, "dc-v1"); const T = L.summarize(xs.filter(x => x.label === "TICKET")), S = L.summarize(xs.filter(x => x.label === "SKIP"));
+  assert.deepStrictEqual([T.n, T.won, T.lost, T.void, T.no_odds], [6, 4, 1, 1, 1]); assert.strictEqual(L.pct(T.hit_rate), "80,0 %"); assert.strictEqual(L.units(T.pl_units), "+0,50 u");
+  assert.strictEqual(L.signedPct(T.roi), "+12,5 %"); assert.strictEqual(L.odds(T.avg_odds), "1,65");
+  assert.strictEqual(L.pct(S.hit_rate), "50,0 %"); assert.strictEqual(L.units(S.pl_units), "−1,00 u"); assert.strictEqual(L.signedPct(S.roi), "−25,0 %"); assert.strictEqual(L.odds(S.avg_odds), "1,80");
+  assert.strictEqual(L.paperCount(bilan.settled, "dc-v1"), 5);
+  assert.strictEqual(L.valueSentence(T, S, 30), "Échantillon trop petit pour conclure (5 tickets, 4 skips)");
+  assert.deepStrictEqual(L.compareAggregates(T, S, bilan.aggregates["dc-v1"]), []);
+  const mm = SD("results/bilan_mismatch.json"); assert.ok(L.compareAggregates(T, S, mm.aggregates["dc-v1"]).length > 0);
+});
+test("bilan par semaine", () => { const w = Object.fromEntries(L.breakdown(L.filterSettled(bilan.settled, "dc-v1"), x => L.isoWeek(x.date)).map(r => [r.key, [r.T.pl_units, r.S.pl_units]]));
+  assert.deepStrictEqual(w, { "2026-W41": [1.3, 0.6], "2026-W42": [-0.8, -1.6] }); });
+test("méthodes séparées dc-v0", () => { const T = L.summarize(L.filterSettled(bilan.settled, "dc-v0").filter(x => x.label === "TICKET")); assert.deepStrictEqual([T.n, T.hit_rate, T.pl_units], [3, 1, 1.5]); });
+test("suivis : archivage à 08:00 et tri", () => {
+  const s = { 1: { kickoff: "2026-10-12T21:00:00+02:00" }, 2: { kickoff: "2026-10-13T01:10:00+02:00" }, 3: { kickoff: "2026-10-12T15:00:00+02:00" } };
+  assert.deepStrictEqual(L.suivisSplit(s, new Date("2026-10-12T12:00:00+02:00")).active.map(x => x.fixture_id), [3, 1, 2]);
+  const z = L.suivisSplit(s, new Date("2026-10-13T09:00:00+02:00")); assert.strictEqual(z.active.length, 0); assert.strictEqual(z.archived.length, 3);
+});
+test("import sans doublon", () => { const n = new Date(); const ex = [{ fixture_id: 5, kickoff: "2026-10-12T21:00:00+02:00", home: "a", away: "b", league: "x" }];
+  const a = L.importSuivis({}, ex, n); const b = L.importSuivis(a.suivis, ex, n); assert.strictEqual(a.added, 1); assert.strictEqual(b.added, 0); assert.strictEqual(Object.keys(b.suivis).length, 1); });
+test("statuts", () => { assert.strictEqual(L.statusText({ status: { short: "PST" }, kickoff: "2026-10-12T15:00:00+02:00" }), "Reporté"); assert.strictEqual(L.statusText({ status: { short: "2H", elapsed: 62 }, score: {} }), "62'"); });
+test("résultat d'un pick", () => { assert.strictEqual(L.outcome("DC", "1X", 2, 0), "won"); assert.strictEqual(L.outcome("OU2.5", "over", 1, 1), "lost"); assert.strictEqual(L.outcome("1X_BTTS", "yes", 1, 1), "won"); });
+test("données anciennes", () => { assert.strictEqual(L.staleText(new Date("2026-10-12T15:00:00+02:00"), "2026-10-12T10:00:00+02:00"), "5 h"); assert.strictEqual(L.staleText(new Date("2026-10-12T12:00:00+02:00"), "2026-10-12T10:00:00+02:00"), null); });
+test("schema_version", () => { assert.ok(L.schemaOk({ schema_version: "6.0" })); assert.ok(!L.schemaOk({ schema_version: "7.0" })); });

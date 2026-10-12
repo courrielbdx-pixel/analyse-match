@@ -1,0 +1,122 @@
+{
+ "schema_version": "6.0",
+ "generated_at": "2026-10-12T10:00:00+02:00",
+ "fixture_id": 1009,
+ "form": {
+  "home": {
+   "last5": [
+    "V",
+    "V",
+    "N",
+    "D",
+    "V"
+   ],
+   "home_record": {
+    "w": 3,
+    "d": 0,
+    "l": 0
+   }
+  },
+  "away": {
+   "last5": [
+    "D",
+    "D",
+    "N",
+    "D",
+    "V"
+   ],
+   "away_record": {
+    "w": 0,
+    "d": 1,
+    "l": 2
+   }
+  }
+ },
+ "rest_days": {
+  "home": 3,
+  "away": 6
+ },
+ "absences": {
+  "home": [],
+  "away": [
+   {
+    "player": "Joueur X",
+    "reason_fr": "Blessure",
+    "importance": "titulaire"
+   }
+  ]
+ },
+ "lineups": {
+  "confirmed": true,
+  "home": [
+   "Dom 1",
+   "Dom 2",
+   "Dom 3",
+   "Dom 4",
+   "Dom 5",
+   "Dom 6",
+   "Dom 7",
+   "Dom 8",
+   "Dom 9",
+   "Dom 10",
+   "Dom 11"
+  ],
+  "away": [
+   "Ext 1",
+   "Ext 2",
+   "Ext 3",
+   "Ext 4",
+   "Ext 5",
+   "Ext 6",
+   "Ext 7",
+   "Ext 8",
+   "Ext 9",
+   "Ext 10",
+   "Ext 11"
+  ],
+  "formation_home": "4-3-3",
+  "formation_away": "3-5-2"
+ },
+ "h2h": [
+  {
+   "date": "2025-03-02",
+   "home": "Extérieur 1009",
+   "away": "Domicile 1009",
+   "score": "0-0",
+   "competition": "Ligue 1"
+  }
+ ],
+ "standings": {
+  "league_name": "Ligue 1",
+  "season": 2026,
+  "table": [
+   {
+    "rank": 1,
+    "team_id": 10090,
+    "team": "Domicile 1009",
+    "played": 6,
+    "points": 14,
+    "gd": 8,
+    "form": "VVNDV"
+   },
+   {
+    "rank": 2,
+    "team_id": 7,
+    "team": "Autre équipe",
+    "played": 6,
+    "points": 12,
+    "gd": 5,
+    "form": "VNVVD"
+   },
+   {
+    "rank": 9,
+    "team_id": 10091,
+    "team": "Extérieur 1009",
+    "played": 6,
+    "points": 6,
+    "gd": -3,
+    "form": "DDNDV"
+   }
+  ]
+ }
+}

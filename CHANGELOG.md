@@ -1,0 +1,7 @@
+# Changelog — Analyse Match
+
+## v6.0.0 — 2026-10-12
+- **Demande d'origine** : construction complète du site v6 à partir du cahier des charges `cahier_des_charges_analyse_match_v6.md` (Bruno, via Grok Bot).
+- **Ce qui a changé** : nouveau site statique (HTML/CSS/JS sans framework) : Agenda (Affiches 10/20/30, Heure, Nuit, Suivis), page match, Bilan, Règles et à propos, Diagnostic, cache hors ligne, mode exemple `?data=sample&now=…&variant=mismatch|v7|big`.
+- **Fichiers touchés** : index.html, styles.css, config.js, logic.js, app.js, sw.js, manifest.webmanifest, icons/, sample-data/, tests/.
+- **Tests rejoués** : tests/logic.test.js (node --test) et tests/ta.py (Playwright, TA-01 à TA-47), voir tests/RAPPORT.md.
