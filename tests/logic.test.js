@@ -76,3 +76,9 @@ test("version : config.js = index.html (?v=) = sw.js par défaut", () => {
   for (const f of ["config.js", "logic.js", "app.js"]) assert.ok(html.includes(`${f}?v=${v}`), f);
   assert.ok(fs.readFileSync(p.join(dir, "sw.js"), "utf8").includes(`"${v}"`));
 });
+test("combos double chance + buts", () => { assert.strictEqual(L.shortSel("X2_U3.5", "yes"), "N2 & −3,5"); assert.strictEqual(L.shortSel("1X_O1.5", "yes"), "1N & +1,5"); assert.strictEqual(L.shortSel("12_BTTS", "yes"), "12 & BTTS"); });
+test("résultats combos et mi-temps", () => {
+  assert.strictEqual(L.outcome("X2_U3.5", "yes", 1, 1), "won"); assert.strictEqual(L.outcome("12_O2.5", "yes", 2, 2), "lost");
+  assert.strictEqual(L.outcome("HT1X2", "1", 1, 2, { home: 1, away: 0 }), "won"); assert.strictEqual(L.outcome("HT1X2", "X", 0, 0, null), null);
+  assert.strictEqual(L.shortSel("HT1X2", "X"), "MT N");
+});

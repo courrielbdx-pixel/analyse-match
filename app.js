@@ -118,7 +118,7 @@
     const fr = finalOf(f); const r = fr && fr.reading;
     const fin = L.FINISHED.includes(f.status.short), live = L.LIVE.includes(f.status.short);
     let res = "";
-    if (fin && r) { const o = L.outcome(r.pick.market, r.pick.selection, f.score.home, f.score.away); res = o === "won" ? `<span class="res ok" aria-label="pick gagné">✓</span>` : o === "lost" ? `<span class="res ko" aria-label="pick perdu">✗</span>` : ""; }
+    if (fin && r) { const o = L.outcome(r.pick.market, r.pick.selection, f.score.home, f.score.away, f.score.ht); res = o === "won" ? `<span class="res ok" aria-label="pick gagné">✓</span>` : o === "lost" ? `<span class="res ko" aria-label="pick perdu">✗</span>` : ""; }
     return `<li class="row" data-open="${f.fixture_id}" data-date="${f._date}">
       <a class="rowlink" href="#/match/${f.fixture_id}?d=${f._date}">
         <span class="time${live ? " live" : ""}${fin ? " fin" : ""}">${live && f.score && f.score.home != null ? `<span class="sc">${f.score.home}-${f.score.away}</span><span class="mn">${f.status.short === "HT" ? "MT" : f.status.elapsed != null ? f.status.elapsed + "'" : ""}</span>` : esc(L.statusText(f))}${(live || fin || f.status.short === "HT") ? `<span class="ko">${L.hm(f.kickoff)}</span>` : ""}</span>
@@ -241,7 +241,7 @@
     if ((r.reasoning_fr || []).length) h += `<ul class="reasoning">${r.reasoning_fr.slice(0, 3).map(x => `<li>${esc(x)}</li>`).join("")}</ul>`;
     if (r.web_check && (r.web_check.items_fr || []).length) h += `<div class="web"><h3>Vérification web</h3><ul>${r.web_check.items_fr.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>`;
     if (r.odds_seen) h += `<p class="odds">cote vue ${L.odds(r.odds_seen.value)} (${esc(r.odds_seen.bookmaker)}) — information${r.ev != null ? ` · EV ${L.signedPct(r.ev)}` : ""}</p>`;
-    if (fin) { const o = L.outcome(r.pick.market, r.pick.selection, f.score.home, f.score.away); h += `<p class="final">Score final ${f.score.home}-${f.score.away} · Pick ${o === "won" ? "gagné ✓" : o === "lost" ? "perdu ✗" : "—"}</p>`; }
+    if (fin) { const o = L.outcome(r.pick.market, r.pick.selection, f.score.home, f.score.away, f.score.ht); h += `<p class="final">Score final ${f.score.home}-${f.score.away} · Pick ${o === "won" ? "gagné ✓" : o === "lost" ? "perdu ✗" : "—"}</p>`; }
     else if (["CANC", "ABD", "AWD", "WO"].includes(f.status.short)) h += `<p class="final">Pick annulé</p>`;
     h += chk.ok ? `<p class="coh ok">Cohérence : ✓ contrôles passés</p>` : chk.fails.map(x => `<p class="coh ko">Incohérence détectée : ${esc(x.id)} — ${esc(x.detail_fr)}</p>`).join("");
     h += probaBlock(r);

@@ -22,9 +22,12 @@
   function shortSel(market, sel) {
     if (market === "1X2") return { "1": "1", "X": "N", "2": "2" }[sel] || sel;
     if (market === "DC") return { "1X": "1N", "X2": "N2", "12": "12" }[sel] || sel;
+    if (market === "HT1X2") return "MT " + ({ "1": "1", "X": "N", "2": "2" }[sel] || sel);
     if (/^OU/.test(market)) return (sel === "over" ? "+" : "−") + market.slice(2).replace(".", ",");
     if (market === "BTTS") return sel === "yes" ? "BTTS oui" : "BTTS non";
-    return { "1X_O1.5": "1N & +1,5", "1X_BTTS": "1N & BTTS", "BTTS_O2.5": "BTTS & +2,5" }[market] || market;
+    const m = /^(1X|X2|12)_(O1\.5|O2\.5|U3\.5|BTTS)$/.exec(market);
+    if (m) return { "1X": "1N", "X2": "N2", "12": "12" }[m[1]] + " & " + { "O1.5": "+1,5", "O2.5": "+2,5", "U3.5": "−3,5", "BTTS": "BTTS" }[m[2]];
+    return { "BTTS_O2.5": "BTTS & +2,5" }[market] || market;
   }
   // ---- vues agenda ----
   const kick = f => Date.parse(f.kickoff);
@@ -83,8 +86,11 @@
     return { ok: all.length === 0 && !(r.coherence_check && r.coherence_check.passed === false), fails: all, siteFails: fails };
   }
   // ---- résultat d'un pick ----
-  function outcome(market, sel, hg, ag) {
+  function outcome(market, sel, hg, ag, ht) {
     if (hg == null || ag == null) return null; const t = hg + ag;
+    if (market === "HT1X2") { if (!ht || ht.home == null) return null; return ({ "1": ht.home > ht.away, "X": ht.home === ht.away, "2": ht.home < ht.away }[sel]) ? "won" : "lost"; }
+    const cm = /^(1X|X2|12)_(O1\.5|O2\.5|U3\.5|BTTS)$/.exec(market);
+    if (cm) { const d = { "1X": hg >= ag, "X2": hg <= ag, "12": hg !== ag }[cm[1]], g = { "O1.5": t >= 2, "O2.5": t >= 3, "U3.5": t <= 3, "BTTS": hg > 0 && ag > 0 }[cm[2]]; return d && g ? "won" : "lost"; }
     const m = { "1X2|1": hg > ag, "1X2|X": hg === ag, "1X2|2": hg < ag, "DC|1X": hg >= ag, "DC|X2": hg <= ag, "DC|12": hg !== ag,
       "BTTS|yes": hg > 0 && ag > 0, "BTTS|no": !(hg > 0 && ag > 0), "1X_O1.5|yes": hg >= ag && t >= 2, "1X_BTTS|yes": hg >= ag && hg > 0 && ag > 0, "BTTS_O2.5|yes": hg > 0 && ag > 0 && t >= 3 };
     const k = market + "|" + sel; if (k in m) return m[k] ? "won" : "lost";
