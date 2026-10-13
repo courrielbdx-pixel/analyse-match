@@ -49,6 +49,11 @@
     if (sc.status === "cancelled") return { text: `Annulé (info : ${sc.reason_fr || "info contradictoire"})`, cls: "ko" };
     return { text: "Vérification X en attente", cls: "wait" };
   }
+  // ---- relecture d'un match à TICKET publié : pick du ticket réévalué ----
+  function recheckText(t, time) {
+    const crit = t.still_ok ? "critères toujours OK" : `critères plus OK : ${(t.reasons_fr || []).join(", ")}`;
+    return `Relecture (info)${time ? " " + time : ""} : ${shortSel(t.market, t.selection)} ${pct(t.model_probability)} · cote ${t.odds != null ? odds(t.odds) : "—"}${t.ev != null ? " · EV " + signedPct(t.ev) : ""} · ${crit}`;
+  }
   // ---- suivi des lectures ----
   const SKIP_RULE_TS = Date.parse("2026-10-13T10:00:00+02:00"); // titre SKIP = plus probable (avant : EV max)
   function histChange(prev, r) {
@@ -245,7 +250,7 @@
     const ms = now.getTime() - Date.parse(gen); if (ms <= 3 * 3600e3) return null; return durationText(ms);
   }
   function durationText(ms) { const m = Math.round(ms / 60000); if (m < 60) return `${m} min`; const h = Math.floor(m / 60), r = m % 60; return r ? `${h} h ${String(r).padStart(2, "0")}` : `${h} h`; }
-  const API = { paris, addDays, dateBar, dayLabel, pct, units, odds, signedPct, nf, shortSel, affiches, heure, nuit, regionFilter, finalReading, recheck, outcome, mergeLive, statusText, hm, nextReading, laterReadings, combineInfo, espnStatus, skipTag, histChange, histWhen,
+  const API = { paris, addDays, dateBar, dayLabel, pct, units, odds, signedPct, nf, shortSel, affiches, heure, nuit, regionFilter, finalReading, recheck, outcome, mergeLive, statusText, hm, nextReading, laterReadings, combineInfo, espnStatus, skipTag, histChange, histWhen, recheckText,
     suivisSplit, exportSuivis, importSuivis, isoWeek, summarize, filterSettled, breakdown, calibration, cumulative, valueSentence, compareAggregates, paperCount, bucketOf,
     schemaOk, validFixture, staleText, durationText, offsetFor, FINISHED, LIVE };
   if (typeof module !== "undefined" && module.exports) module.exports = API; else root.AMLogic = API;

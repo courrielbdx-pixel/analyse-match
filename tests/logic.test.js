@@ -112,3 +112,9 @@ test("suivi : même marché comparé, changement de règle SKIP, date", () => {
   assert.strictEqual(L.histWhen("2026-10-12T17:42:08+02:00", "2026-10-13"), "12/10 17:42");
   assert.strictEqual(L.histWhen("2026-10-13T07:09:33+02:00", "2026-10-13"), "07:09");
 });
+
+test("relecture d'un ticket : pick du ticket réévalué", () => {
+  const t = { market: "DC", selection: "1X", model_probability: 0.574, odds: 1.88, ev: 0.079, still_ok: false, reasons_fr: ["Écart modèle/marché 5,8 pts > 5"] };
+  assert.strictEqual(L.recheckText(t), "Relecture (info) : 1N 57,4 % · cote 1,88 · EV +7,9 % · critères plus OK : Écart modèle/marché 5,8 pts > 5");
+  assert.ok(L.recheckText({ ...t, still_ok: true, reasons_fr: [] }, "20:42").endsWith("critères toujours OK"));
+});

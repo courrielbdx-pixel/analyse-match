@@ -273,7 +273,8 @@
     if (!hasCompo && ko > 0 && ko < 90 * 60e3 && fr.readings.some(x => x.trigger === "matin")) h += `<p class="note">En attente des compos officielles (relecture automatique par Grok Bot)</p>`;
     h += altLine(r, false) + valLine(r, false, f._pick && f._pick.skip_check);
     const lat = r.label === "TICKET" ? L.laterReadings(fr) : [];
-    if (lat.length) { const x = lat[lat.length - 1]; h += `<p class="muted relect">Relecture (info) ${L.paris(x.timestamp).time} : ${x.label} ${esc(x.pick.label_fr)} (${L.pct(x.model_probability)}) — le ticket officiel reste ${esc(r.pick.label_fr)}.</p>`; }
+    if (lat.length) { const x = lat[lat.length - 1]; h += x.ticket_recheck ? `<p class="muted relect">${esc(L.recheckText(x.ticket_recheck, L.paris(x.timestamp).time))} — ticket verrouillé (inchangé).</p><p class="muted">Affichage SKIP (info) : ${esc(x.pick.label_fr)} ${L.pct(x.model_probability)}</p>`
+      : `<p class="muted relect">Relecture (info) ${L.paris(x.timestamp).time} : ${x.label} ${esc(x.pick.label_fr)} (${L.pct(x.model_probability)}) — le ticket officiel reste ${esc(r.pick.label_fr)}.</p>`; }
     if (r.label === "SKIP" && (r.skip_reasons_fr || []).length) h += `<ul class="reasons">${r.skip_reasons_fr.map(x => `<li>${esc(x)}</li>`).join("")}</ul>`;
     if ((r.reasoning_fr || []).length) h += `<ul class="reasoning">${r.reasoning_fr.slice(0, 3).map(x => `<li>${esc(x)}</li>`).join("")}</ul>`;
     if (r.web_check && (r.web_check.items_fr || []).length) h += `<div class="web"><h3>Vérification web</h3><ul>${r.web_check.items_fr.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>`;
@@ -297,10 +298,13 @@
     rs = rs.slice().sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp));
     const li = rs.map(r => {
       const sel = L.shortSel(r.pick.market, r.pick.selection);
-      const c = L.histChange(prev, r);
-      const ch = c ? `<div class="chg">${esc(c.text)}${c.title ? ` · ${esc(c.title)}` : ""} — <i>${esc(c.reason)}</i></div>` : "";
-      prev = r;
-      return `<li${r === fin ? ' class="final"' : ""}>${esc(TRIG[r.trigger] || r.trigger)} · ${L.histWhen(r.timestamp, ref)} — ${esc(sel)} · ${r.label} · ${L.pct(r.model_probability)}${r === fin ? " — <i>Lecture finale</i>" : ""}${ch}</li>`;
+      const tr = r !== fin && r.ticket_recheck;
+      const c = tr ? null : L.histChange(prev, r);
+      const ch = tr ? `<div class="chg">Affichage SKIP (info) : ${esc(sel)} · ${r.label} · ${L.pct(r.model_probability)}</div>`
+        : c ? `<div class="chg">${esc(c.text)}${c.title ? ` · ${esc(c.title)}` : ""} — <i>${esc(c.reason)}</i></div>` : "";
+      if (!tr) prev = r;
+      const head = tr ? esc(L.recheckText(tr)) : `${esc(sel)} · ${r.label} · ${L.pct(r.model_probability)}`;
+      return `<li${r === fin ? ' class="final"' : ""}>${esc(TRIG[r.trigger] || r.trigger)} · ${L.histWhen(r.timestamp, ref)} — ${head}${r === fin ? " — <i>Lecture finale</i>" : ""}${ch}</li>`;
     }).join("");
     return `<section class="card"><h2>Suivi des lectures <span class="cnt">${rs.length} lecture${rs.length > 1 ? "s" : ""}</span></h2><ol class="hist">${li}</ol></section>`;
   }
