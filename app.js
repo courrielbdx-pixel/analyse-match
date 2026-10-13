@@ -357,6 +357,13 @@
       const rows = ["probable", "resultat", "valeur"].map(k => { const x = sl[k] || {}; return `<tr><th>${nm[k]}</th><td>${x.n || 0}</td><td>${x.hit_rate == null ? "—" : L.pct(x.hit_rate)}</td><td>${x.avg_odds == null ? "—" : L.odds(x.avg_odds)}</td><td>${x.with_odds ? `${x.profit_eur >= 0 ? "+" : ""}${L.nf(x.profit_eur, 2)} € (${L.signedPct(x.roi)})` : "—"}</td></tr>`; }).join("");
       h += `<section class="card skipb"><h3>Bilan SKIP (info)</h3><p class="muted">Lignes affichées sur les matchs SKIP, figées au coup d'envoi. Simulation à 1 € par ligne, à part : ce n'est pas le bilan des tickets.</p><div class="hscroll"><table><tr><th></th><th>Paris</th><th>Réussite</th><th>Cote moy.</th><th>Profit / ROI</th></tr>${rows}</table></div><p class="muted">Profit calculé seulement quand une cote existait ; sinon la ligne compte pour la réussite uniquement.</p></section>`;
     }
+    { const vl = r.data.valeur_learning; if (vl && vl.families) {
+      const fams = L.valeurFamilies(vl);
+      const rows = fams.map(f => `<tr class="${f.excluded ? "ko" : ""}"><th>${esc(f.name)}</th><td>${f.n} <span class="muted">(${f.seed_n} backtest + ${f.live_n} réels)</span></td><td>${L.signedPct(f.roi)}</td><td>${L.signedPct(f.ci80[0])} ; ${L.signedPct(f.ci80[1])}</td><td>${f.excluded ? "<b>exclu</b>" : f.n < 20 ? "trop peu de paris" : "gardé"}</td></tr>`).join("");
+      const ex = (vl.excluded || []).length ? vl.excluded.map(esc).join(", ") : "aucun";
+      h += `<section class="card vlearn"><h3>Types exclus de la ligne Valeur (apprentissage)</h3><p><b>Exclus aujourd'hui : ${ex}</b></p><div class="hscroll"><table><tr><th>Famille</th><th>Paris</th><th>ROI</th><th>IC 80 %</th><th>Statut</th></tr>${rows}</table></div><p class="muted">${esc(vl.rule_fr || "")} ${esc(vl.guard_fr || "")}. Information seulement : n'affecte jamais les tickets.</p></section>`;
+    }
+    }
     const cv = r.data.clv; if (cv) {
       const nm = { tickets: "Tickets", probable: "SKIP · Probable", resultat: "SKIP · Résultat", valeur: "SKIP · Valeur" };
       const rows = Object.keys(nm).map(k => { const x = cv[k] || {}; return `<tr><th>${nm[k]}</th><td>${x.n || 0}</td><td>${x.n ? L.signedPct(x.mean_clv) : "—"}</td><td>${x.n ? L.pct(x.beat_close) : "—"}</td></tr>`; }).join("");

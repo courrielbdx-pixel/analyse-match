@@ -119,3 +119,8 @@ test("relecture d'un ticket : pick du ticket réévalué", () => {
   assert.strictEqual(L.recheckText(t), "Relecture (info) : 1N 57,4 % · cote 1,88 · EV +7,9 % · critères plus OK : Écart modèle/marché 5,8 pts > 5");
   assert.ok(L.recheckText({ ...t, still_ok: true, reasons_fr: [] }, "20:42").endsWith("critères toujours OK"));
 });
+
+test("apprentissage Valeur : familles exclues en tête", () => {
+  const f = L.valeurFamilies({ families: { "OU2.5 plus": { n: 300, roi: -0.02, ci80: [-0.09, 0.04], excluded: false }, "1N2": { n: 300, roi: -0.16, ci80: [-0.24, -0.09], excluded: true }, "BTTS": { n: 1, roi: 0.5, excluded: false } } });
+  assert.deepStrictEqual(f.map(x => x.name), ["1N2", "OU2.5 plus", "BTTS"]); assert.deepStrictEqual(f[2].ci80, [null, null]);
+});
