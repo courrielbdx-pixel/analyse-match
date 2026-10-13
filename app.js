@@ -155,7 +155,8 @@
     if (m) await loadDate(d);
     const fx = fixturesOf(d); const reg = prefs.region;
     const d1 = L.addDays(d, 1); if (m && avail.includes(d1)) await loadDate(d1);
-    const aff = L.affiches(fx, d, reg, prefs.n), hr = L.heure(fx, d, reg), nt = L.nuit(fixturesOf(d1), d1, reg); // « Nuit » = la nuit qui suit (00h–08h du lendemain)
+    const aff0 = L.affiches(fx, d, reg, prefs.n), hr = vis(L.heure(fx, d, reg)), nt = vis(L.nuit(fixturesOf(d1), d1, reg));
+    const aff = { ...aff0, rows: vis(aff0.rows) }; const nLive = liveCount(d, reg); // « Nuit » = la nuit qui suit (00h–08h du lendemain)
     const dl1 = L.dayLabel(d1); const nuitTitle = `Cette nuit (${dl1.wd} ${dl1.day} ${dl1.month}, 00h–08h)`;
     const sp = L.suivisSplit(suivis, now()); if (sp.purge.length) { for (const id of sp.purge) delete suivis[id]; saveSuivis(); }
     const regOK = s => reg === "toutes" || s.region === reg;
@@ -176,16 +177,19 @@
       body += list(aff.rows, aff.une);
     } else if (prefs.view === "heure") {
       let h = ""; body = `<ul class="list">` + hr.map(f => { const hh = L.hm(f.kickoff); const sep = hh !== h ? `<li class="sep">${hh}</li>` : ""; h = hh; return sep + row(f); }).join("") + `</ul>`;
-      if (!hr.length) body += `<p class="empty">Aucun match.</p>`;
+      if (!hr.length) body += `<p class="empty">${prefs.liveOnly ? "Aucun match en direct." : "Aucun match."}</p>`;
     } else if (prefs.view === "nuit") body = nt.length ? `<p class="sep">${nuitTitle}</p>` + list(nt) : "";
     else body = suivisView(act, arch);
     if ((prefs.view === "heure" || prefs.view === "affiches") && nt.length) body += `<h3 class="sep nuit">${nuitTitle}</h3>` + list(nt);
-    if ((prefs.view === "nuit" && !nt.length) || (prefs.view === "affiches" && !aff.rows.length)) body += `<p class="empty">Aucun match.</p>`;
+    if ((prefs.view === "nuit" && !nt.length) || (prefs.view === "affiches" && !aff.rows.length)) body += `<p class="empty">${prefs.liveOnly ? "Aucun match en direct." : "Aucun match."}</p>`;
     if ((prefs.view === "affiches" || prefs.view === "heure") && x.fixtures) body = combineCard(x.combine && x.combine.combine) + body + funCard(x.combine && x.combine.fun);
     if (x.picks_status === 404 && prefs.view !== "suivis" && x.fixtures) body = `<p class="note">Lectures pas encore publiées pour le ${fmtDate(d)}.</p>` + body;
-    $app.innerHTML = header() + `<nav class="dates" aria-label="Dates">${dates}</nav><div class="views">${views}</div><div class="filters">${regs}</div><section id="list">${body}</section>`;
+    $app.innerHTML = header() + `<nav class="dates" aria-label="Dates">${dates}</nav><div class="views">${views}</div><div class="filters">${regs}<label class="sw"><input type="checkbox" id="hideFin"${prefs.hideFin ? " checked" : ""}> Masquer les matchs terminés</label><label class="sw livef"><input type="checkbox" id="liveOnly"${prefs.liveOnly ? " checked" : ""}> En direct <span class="cnt live" id="livecnt">${nLive}</span></label></div><section id="list">${body}</section>`;
     restoreScroll();
   }
+  const FIN_ALL = ["FT", "AET", "PEN", "CANC", "ABD", "AWD", "WO"];
+  function vis(a) { return a.filter(f => { const s = f.status && f.status.short; return (!prefs.liveOnly || L.LIVE.includes(s)) && (!prefs.hideFin || !FIN_ALL.includes(s)); }); }
+  function liveCount(d, reg) { const d1 = L.addDays(d, 1); return [...L.heure(fixturesOf(d), d, reg), ...L.nuit(fixturesOf(d1), d1, reg)].filter(f => L.LIVE.includes(f.status && f.status.short)).length; }
   const fmtDate = d => { const l = L.dayLabel(d); return `${l.wd} ${l.day} ${l.month}`; };
   function list(rows, une) { return rows.length ? `<ul class="list">${rows.map(f => row(f, une === f.fixture_id)).join("")}</ul>` : ""; }
   function suivisView(act, arch) {
@@ -521,6 +525,7 @@
   document.addEventListener("change", async e => {
     const t = e.target;
     if (t.id === "region") { prefs.region = t.value; savePrefs(); return route(); }
+    if (t.id === "hideFin" || t.id === "liveOnly") { prefs[t.id] = t.checked; savePrefs(); const y = window.scrollY; await route(); window.scrollTo(0, y); return; }
     if (t.id === "showPast") { prefs.showPast = t.checked; savePrefs(); return route(); }
     if (t.id === "method") { prefs.method = t.value; savePrefs(); return route(); }
     if (t.id === "period") { prefs.period = t.value; savePrefs(); return route(); }
@@ -571,7 +576,9 @@
         e.status = s; e.score = { home: c.home, away: c.away }; e.updated_at = nowIso; }
       const old = JSON.stringify(state.data[d].live && state.data[d].live.live); if (JSON.stringify(j.live) === old) return;
       state.data[d].live = j; LS.set(cacheKey(`live/${d}.json`), { at: Date.now(), data: j });
-      if (current === "agenda") {
+      if (current === "agenda" && (prefs.hideFin || prefs.liveOnly)) { const y = window.scrollY; await route(); window.scrollTo(0, y); }
+      else if (current === "agenda") {
+        const lc = document.getElementById("livecnt"); if (lc) lc.textContent = liveCount(d, prefs.region);
         for (const f of fixturesOf(d)) { const li = document.querySelector(`#list li.row[data-open="${f.fixture_id}"]`); if (!li) continue;
           const tmp = document.createElement("ul"); tmp.innerHTML = row(f, !!li.querySelector(".une")); const nw = tmp.firstElementChild; if (nw && nw.innerHTML !== li.innerHTML) li.replaceWith(nw); }
       } else { const y = window.scrollY; await route(); window.scrollTo(0, y); }

@@ -61,3 +61,6 @@ code{font-size:12px;overflow-wrap:anywhere}
 .cal{position:relative;height:14px;min-width:90px;background:rgba(127,127,127,.12);border-radius:3px}
 .cal i{position:absolute;left:0;height:6px;border-radius:3px}.cal i.p{top:1px;background:#6b8afd}.cal i.r{top:7px;background:#2fbf71}
 details.fiab summary{cursor:pointer}
+.filters{display:flex;flex-wrap:wrap;gap:.5rem 1rem;align-items:center}
+.filters .sw{display:inline-flex;align-items:center;gap:.35rem;font-size:.9rem;white-space:nowrap}
+.cnt.live{background:#e5383b;color:#fff;border-radius:9px;padding:0 .45em;font-weight:600}

@@ -12,3 +12,6 @@
 
 ## v6.0.23 — 2026-10-13
 - Bankroll Kelly 1/4 : 4 lignes (Tickets, SKIP Probable, Résultat, Valeur), colonnes paris misés / sans mise, note explicative.
+
+## v6.0.24 — 2026-10-13
+- Agenda : « Masquer les matchs terminés » (mémorisé) et filtre « En direct » avec compteur mis à jour toutes les 30 s.
