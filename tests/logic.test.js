@@ -88,3 +88,4 @@ test("combiné : moins de 2 tickets → message ; sinon produit des probas et de
   const c = L.combineInfo({ legs: [{ prob: 0.6, odds: 1.8 }, { prob: 0.6, odds: 1.7 }] });
   assert.ok(Math.abs(c.odds - 3.06) < 1e-9 && Math.abs(c.p - 0.36) < 1e-9 && Math.abs(c.ev - (0.36 * 3.06 - 1)) < 1e-9);
 });
+test("SKIP : 2e ligne résultat/BTTS (libellé court)", () => { assert.strictEqual(L.shortSel("DC", "12"), "12"); assert.strictEqual(L.shortSel("BTTS", "no"), "BTTS non"); });
