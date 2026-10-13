@@ -33,7 +33,7 @@
   }
   const cacheKey = p => `am.v6.cache.${MODE === "real" ? "real" : MODE}.${p}`;
   async function fetchJSON(path) {
-    const bust = /^https?:/.test(BASE) && (path === "meta.json" || path.startsWith("live/")) ? `?t=${Math.floor(Date.now() / 60e3)}` : "";
+    const bust = /^https?:/.test(BASE) && (path === "meta.json" || path.startsWith("live/") || path.startsWith("combine/")) ? `?t=${Math.floor(Date.now() / 60e3)}` : "";
     const url = `${BASE}/${mapPath(path)}${bust}`; let host;
     try { host = new URL(url, location.href).host; } catch (e) { host = "?"; }
     let lastErr = null;
