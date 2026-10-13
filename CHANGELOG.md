@@ -5,3 +5,7 @@
 - **Ce qui a changé** : nouveau site statique (HTML/CSS/JS sans framework) : Agenda (Affiches 10/20/30, Heure, Nuit, Suivis), page match, Bilan, Règles et à propos, Diagnostic, cache hors ligne, mode exemple `?data=sample&now=…&variant=mismatch|v7|big`.
 - **Fichiers touchés** : index.html, styles.css, config.js, logic.js, app.js, sw.js, manifest.webmanifest, icons/, sample-data/, tests/.
 - **Tests rejoués** : tests/logic.test.js (node --test) et tests/ta.py (Playwright, TA-01 à TA-47), voir tests/RAPPORT.md.
+
+## v6.0.22 — 2026-10-13
+- **Demande** : idées GitHub (penaltyblog, sports-betting, scikit-learn) validées par Bruno.
+- **Ce qui a changé** : Bilan → cartes « Cote de clôture (CLV) », « Bankroll simulée (Kelly 1/4, plafond 2 %) » et section « Fiabilité du modèle » (calibration, Brier, log-loss vs bookmakers, backtest + matchs réels). Page match : poids des absents (part des xG+xA, Understat, Big 5). Aucun ticket ni règle modifié.

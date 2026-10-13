@@ -58,3 +58,6 @@ code{font-size:12px;overflow-wrap:anywhere}
 .row .alt{display:block;font-size:12px;color:var(--mut)}p.alt{margin:4px 0}
 
 .xtag{display:inline-block;margin-left:.35em;padding:0 .4em;border-radius:.6em;font-size:.85em;font-weight:600}.xtag.ok{background:#e3f5e8;color:#17663a}.xtag.ko{background:#fde8e8;color:#9b1c1c}.xtag.wait{background:#eef0f4;color:#555}
+.cal{position:relative;height:14px;min-width:90px;background:rgba(127,127,127,.12);border-radius:3px}
+.cal i{position:absolute;left:0;height:6px;border-radius:3px}.cal i.p{top:1px;background:#6b8afd}.cal i.r{top:7px;background:#2fbf71}
+details.fiab summary{cursor:pointer}

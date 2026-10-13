@@ -324,6 +324,7 @@
   // ---------------- Bilan ----------------
   async function bilanPage() {
     const r = await fetchJSON("results/bilan.json"); state.bilan = r.data; const m = state.meta;
+    if (!state.fiab) { try { state.fiab = (await fetchJSON("results/fiabilite.json")).data; } catch (e) { state.fiab = null; } }
     if (!m || !r.data) { $app.innerHTML = header() + `<h2 class="pt">Bilan</h2><p class="empty">Bilan pas encore publié.</p>`; return; }
     const hist = m.methods_history || [{ version: m.method.version, from: m.method.since, to: null }];
     const mv = prefs.method && hist.find(x => x.version === prefs.method) ? prefs.method : m.method.version;
@@ -346,6 +347,15 @@
       const rows = ["probable", "resultat", "valeur"].map(k => { const x = sl[k] || {}; return `<tr><th>${nm[k]}</th><td>${x.n || 0}</td><td>${x.hit_rate == null ? "—" : L.pct(x.hit_rate)}</td><td>${x.avg_odds == null ? "—" : L.odds(x.avg_odds)}</td><td>${x.with_odds ? `${x.profit_eur >= 0 ? "+" : ""}${L.nf(x.profit_eur, 2)} € (${L.signedPct(x.roi)})` : "—"}</td></tr>`; }).join("");
       h += `<section class="card skipb"><h3>Bilan SKIP (info)</h3><p class="muted">Lignes affichées sur les matchs SKIP, figées au coup d'envoi. Simulation à 1 € par ligne, à part : ce n'est pas le bilan des tickets.</p><div class="hscroll"><table><tr><th></th><th>Paris</th><th>Réussite</th><th>Cote moy.</th><th>Profit / ROI</th></tr>${rows}</table></div><p class="muted">Profit calculé seulement quand une cote existait ; sinon la ligne compte pour la réussite uniquement.</p></section>`;
     }
+    const cv = r.data.clv; if (cv) {
+      const nm = { tickets: "Tickets", probable: "SKIP · Probable", resultat: "SKIP · Résultat", valeur: "SKIP · Valeur" };
+      const rows = Object.keys(nm).map(k => { const x = cv[k] || {}; return `<tr><th>${nm[k]}</th><td>${x.n || 0}</td><td>${x.n ? L.signedPct(x.mean_clv) : "—"}</td><td>${x.n ? L.pct(x.beat_close) : "—"}</td></tr>`; }).join("");
+      h += `<section class="card clvb"><h3>Cote de clôture (CLV)</h3><p class="muted">Compare la cote prise à la meilleure cote relevée 2 à 25 min avant le coup d'envoi. Un CLV positif régulier veut dire que le marché a bougé dans notre sens : c'est le signal le plus rapide d'un vrai avantage (environ 50 paris suffisent pour une tendance).</p><div class="hscroll"><table><tr><th></th><th>Paris</th><th>CLV moyen</th><th>Battu la clôture</th></tr>${rows}</table></div></section>`;
+    }
+    const kl = r.data.kelly; if (kl) {
+      const ln = (n, x) => x ? `<tr><th>${n}</th><td>${x.bets}</td><td>${L.nf(x.bank, 2)} €</td><td>${L.signedPct(x.roi_bank)}</td></tr>` : "";
+      h += `<section class="card kelly"><h3>Bankroll simulée (Kelly 1/4)</h3><p class="muted">${esc((kl.tickets || {}).rule_fr || "")}. Mise = 1/4 de la mise « optimale » selon le modèle. Papier uniquement.</p><div class="hscroll"><table><tr><th></th><th>Paris</th><th>Bankroll</th><th>Évolution</th></tr>${ln("Tickets", kl.tickets)}${ln("SKIP · Valeur (info)", kl.valeur)}</table></div></section>`;
+    }
     const fa = r.data.fun_aggregate; if (fa) h += `<section class="card fun"><h3>Combiné fun 🎲 (hors stats tickets)</h3><p>${fa.played} joué(s) · ${fa.won} gagné(s) sur ${fa.settled} réglé(s) · P/L papier à ${L.nf(fa.stake_eur, 2)} € : ${fa.pl_eur >= 0 ? "+" : ""}${L.nf(fa.pl_eur, 2)} €</p></section>`;
     const ca = r.data.combines_aggregate; if (ca) h += `<section class="card"><h3>Combiné du jour</h3><p>${ca.settled} réglé(s) sur ${ca.n} · réussite ${ca.hit_rate == null ? "—" : L.pct(ca.hit_rate)} · ROI papier ${ca.roi == null ? "—" : L.signedPct(ca.roi)} (${ca.pl_units >= 0 ? "+" : ""}${L.nf(ca.pl_units, 2)} u)</p></section>`;
     if (per === "debut") {
@@ -358,7 +368,7 @@
     const day = d => { const z = all.filter(x => x.date === d); if (!z.length) return "Aucun pick réglé"; const t = L.summarize(z.filter(x => x.label === "TICKET")), s = L.summarize(z.filter(x => x.label === "SKIP"));
       return `Tickets ${t.n} (${t.won} G / ${t.lost} P, ${L.units(t.pl_units)}) · Skips ${s.n} (${s.won} G / ${s.lost} P, ${L.units(s.pl_units)})`; };
     h += `<section class="card"><p><b>Hier (${fmtFr(yd)})</b> : ${day(yd)}</p><p><b>Aujourd'hui</b> : ${day(today)}</p></section>`;
-    if (!xs.length) { h += `<p class="empty">Aucun pick réglé pour ${esc(mv)} depuis le ${fmtFr(from || mh.from)}. Le bilan se remplira après les premiers matchs.</p>`; $app.innerHTML = header() + h + howTo(); setW(); return; }
+    if (!xs.length) { h += `<p class="empty">Aucun pick réglé pour ${esc(mv)} depuis le ${fmtFr(from || mh.from)}. Le bilan se remplira après les premiers matchs.</p>`; $app.innerHTML = header() + h + fiabHtml() + howTo(); setW(); return; }
     const card = (t, s, cls) => `<div class="kpi ${cls}"><h3>${t}</h3><dl>
       <dt>Réglés</dt><dd data-k="n">${s.n}</dd><dt>Gagnés</dt><dd data-k="won">${s.won}</dd><dt>Perdus</dt><dd data-k="lost">${s.lost}</dd><dt>Annulés</dt><dd data-k="void">${s.void}</dd>
       <dt>Réussite</dt><dd data-k="hit">${L.pct(s.hit_rate)} <small>sur ${s.won + s.lost}</small></dd><dt>P/L</dt><dd data-k="pl">${L.units(s.pl_units)}</dd>
@@ -377,7 +387,7 @@
       h += `<section class="card"><h3>Relecture compo vs matin</h3><p>${withM.length} matchs relus : pick ou label changé ${chg.length} fois ; lecture du matin gagnante ${mw} fois, lecture finale ${fw} fois.</p></section>`; }
     h += tb("Par jour", L.breakdown(xs, x => x.date), "Jour");
     h += tb("Par semaine", L.breakdown(xs, x => L.isoWeek(x.date)), "Semaine");
-    h += settledList(xs) + howTo();
+    h += settledList(xs) + fiabHtml() + howTo();
     $app.innerHTML = header() + h; setW();
   }
   const maxd = (a, b) => (!a ? b : a > b ? a : b);
@@ -415,6 +425,15 @@
     return `<section class="card"><h3>Calibration (tickets et skips)</h3><svg viewBox="0 0 ${W} ${H}" class="chart cal" role="img" aria-label="Calibration"><line class="diag" x1="${P(0)}" y1="${Yp(0)}" x2="${P(1)}" y2="${Yp(1)}"/><text x="${P(0.55)}" y="${Yp(0.62)}">calibration parfaite</text>${dots}<text x="30" y="296">annoncé →</text></svg>
       <table class="tbl"><thead><tr><th>Tranche</th><th>n</th><th>Annoncé</th><th>Observé</th></tr></thead><tbody>${c.rows.map(r => `<tr class="${r.n < 30 ? "ind" : ""}"><td>${r.bucket} %</td><td>${r.n}</td><td>${L.pct(r.mean_predicted)}</td><td>${L.pct(r.observed)}</td></tr>`).join("")}</tbody></table>
       <p>Score de Brier : ${c.brier == null ? "—" : L.nf(c.brier, 3)} (sur ${c.n}). Plus il est bas, mieux les probabilités annoncées collent aux résultats ; 0,25 correspond à répondre toujours 50 %.</p></section>`;
+  }
+  function fiabHtml() {
+    const f = state.fiab; if (!f || !f.markets) return "";
+    const bar = c => `<tr><td>${esc(c.bin)} %</td><td>${c.n}</td><td>${L.pct(c.pred)}</td><td>${L.pct(c.real)}</td><td><div class="cal"><i data-w="${Math.round(c.pred*100)}" class="p"></i><i data-w="${Math.round(c.real*100)}" class="r"></i></div></td></tr>`;
+    const card = (x) => `<details class="card fiab"><summary><b>${esc(x.label_fr)}</b> · Brier ${L.nf(x.brier, 3)}${x.market_brier != null ? ` (bookmakers ${L.nf(x.market_brier, 3)})` : ""} · log-loss ${L.nf(x.logloss, 3)}${x.market_logloss != null ? ` (bookmakers ${L.nf(x.market_logloss, 3)})` : ""} · écart moyen ${L.pct(x.ece)}</summary><div class="hscroll"><table><tr><th>Tranche</th><th>Matchs</th><th>Prévu</th><th>Réel</th><th></th></tr>${(x.calibration || []).map(bar).join("")}</table></div></details>`;
+    let h = `<section class="card" id="fiabilite"><h3>Fiabilité du modèle</h3><p class="muted">Quand le modèle dit 60 %, est-ce que ça arrive 60 % du temps ? « Prévu » = proba moyenne du modèle dans la tranche, « Réel » = fréquence observée. Brier et log-loss : plus c'est bas, mieux c'est ; comparés aux bookmakers (marge retirée). ${esc(f.source_fr || "")}</p></section>`;
+    h += Object.values(f.markets).map(card).join("");
+    if (f.live) h += card(f.live);
+    return h;
   }
   function howTo() {
     return `<details class="card how"><summary>Comment lire ce bilan</summary><ul>
