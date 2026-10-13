@@ -151,6 +151,26 @@
     if (/^OU/.test(market)) { const l = parseFloat(market.slice(2)); return (sel === "over" ? t > l : t < l) ? "won" : "lost"; }
     return null;
   }
+  // Statut d'une jambe de combiné : résultat réglé, sinon score final/en direct (décision anticipée si elle est déjà certaine)
+  function legStatus(l, f) {
+    if (l.outcome === "won" || l.outcome === "lost" || l.outcome === "void") return l.outcome;
+    if (!f) return "pending"; const s = f.status && f.status.short, sc = f.score || {};
+    if (["CANC", "ABD", "AWD", "WO", "PST"].includes(s)) return "pending";
+    const hg = sc.home, ag = sc.away;
+    if (FINISHED.includes(s)) return outcome(l.market, l.selection, hg, ag, sc.ht || f.ht) || "pending";
+    if (!LIVE.includes(s) || hg == null || ag == null) return "pending";
+    const t = hg + ag, both = hg > 0 && ag > 0;
+    if (/^OU/.test(l.market)) { const x = parseFloat(l.market.slice(2)); if (t > x) return l.selection === "over" ? "won" : "lost"; return "live"; }
+    if (l.market === "BTTS" && both) return l.selection === "yes" ? "won" : "lost";
+    const cm = /_(O1\.5|O2\.5|U3\.5)$/.exec(l.market); if (cm && cm[1] === "U3.5" && t > 3) return "lost";
+    if (l.market === "BTTS_O2.5" || l.market === "1X_BTTS") { /* rien d'anticipé côté gain */ }
+    return "live";
+  }
+  function legsSummary(sts) {
+    const w = sts.filter(x => x === "won").length, lo = sts.filter(x => x === "lost").length, v = sts.filter(x => x === "void").length, p = sts.length - w - lo - v;
+    const status = lo ? "lost" : p ? "pending" : "won";
+    return { won: w, lost: lo, void: v, pending: p, status, text: `${w} ✅ · ${lo} ❌${v ? ` · ${v} annulé(s)` : ""} · ${p} en cours` };
+  }
   const FINISHED = ["FT", "AET", "PEN"], LIVE = ["1H", "HT", "2H", "ET", "BT", "P", "LIVE", "INT", "SUSP"];
   function mergeLive(f, liveEntry, fixturesGen) {
     if (!liveEntry) return f;
@@ -261,6 +281,6 @@
   function durationText(ms) { const m = Math.round(ms / 60000); if (m < 60) return `${m} min`; const h = Math.floor(m / 60), r = m % 60; return r ? `${h} h ${String(r).padStart(2, "0")}` : `${h} h`; }
   const API = { paris, addDays, dateBar, dayLabel, pct, units, odds, signedPct, nf, shortSel, affiches, heure, nuit, regionFilter, finalReading, recheck, outcome, mergeLive, statusText, hm, nextReading, laterReadings, combineInfo, espnStatus, skipTag, histChange, histWhen, recheckText, valeurFamilies,
     suivisSplit, exportSuivis, importSuivis, isoWeek, summarize, filterSettled, breakdown, calibration, cumulative, valueSentence, compareAggregates, paperCount, bucketOf,
-    schemaOk, validFixture, staleText, durationText, offsetFor, FINISHED, LIVE };
+    schemaOk, validFixture, staleText, durationText, offsetFor, FINISHED, LIVE, legStatus, legsSummary };
   if (typeof module !== "undefined" && module.exports) module.exports = API; else root.AMLogic = API;
 })(typeof self !== "undefined" ? self : this);

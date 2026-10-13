@@ -18,3 +18,6 @@
 
 ## v6.0.25 — 2026-10-13
 - Tickets tardifs (badge 🆕 TICKET tardif, bilan séparé, ligne Kelly) et annulations H-1 (badge ⚠️ Annulé — info de dernière heure, journal des annulés).
+
+## v6.0.27 — 2026-10-13
+- Combiné fun : statut de chaque sélection au fur et à mesure (✅ gagné, ❌ perdu, ⏳ en cours/à venir), avec score en direct ; décision anticipée en direct quand elle est certaine (+1,5 gagné dès 2 buts, −3,5 perdu dès 4 buts, BTTS). Ligne résumé « X ✅ · Y ❌ · Z en cours » et combiné perdu dès la première sélection perdue. Affichage seulement.

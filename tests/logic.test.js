@@ -124,3 +124,21 @@ test("apprentissage Valeur : familles exclues en tête", () => {
   const f = L.valeurFamilies({ families: { "OU2.5 plus": { n: 300, roi: -0.02, ci80: [-0.09, 0.04], excluded: false }, "1N2": { n: 300, roi: -0.16, ci80: [-0.24, -0.09], excluded: true }, "BTTS": { n: 1, roi: 0.5, excluded: false } } });
   assert.deepStrictEqual(f.map(x => x.name), ["1N2", "OU2.5 plus", "BTTS"]); assert.deepStrictEqual(f[2].ci80, [null, null]);
 });
+
+
+test("legStatus combiné fun : réglé, direct anticipé, en attente", () => {
+  const fx = (st, h, a) => ({ status: { short: st }, score: { home: h, away: a } });
+  const o15 = { market: "OU1.5", selection: "over" }, u35 = { market: "OU3.5", selection: "under" }, dc = { market: "DC", selection: "1X" };
+  assert.strictEqual(L.legStatus({ ...o15, outcome: "lost" }, fx("2H", 3, 0)), "lost");
+  assert.strictEqual(L.legStatus(o15, fx("1H", 1, 1)), "won");
+  assert.strictEqual(L.legStatus(o15, fx("1H", 1, 0)), "live");
+  assert.strictEqual(L.legStatus(u35, fx("2H", 3, 1)), "lost");
+  assert.strictEqual(L.legStatus(u35, fx("2H", 2, 1)), "live");
+  assert.strictEqual(L.legStatus(dc, fx("2H", 0, 2)), "live");
+  assert.strictEqual(L.legStatus(dc, fx("FT", 0, 2)), "lost");
+  assert.strictEqual(L.legStatus(dc, fx("NS", null, null)), "pending");
+  assert.strictEqual(L.legStatus(dc, undefined), "pending");
+  const s = L.legsSummary(["won", "won", "lost", "live"]);
+  assert.strictEqual(s.text, "2 ✅ · 1 ❌ · 1 en cours"); assert.strictEqual(s.status, "lost");
+  assert.strictEqual(L.legsSummary(["won", "void"]).status, "won");
+});

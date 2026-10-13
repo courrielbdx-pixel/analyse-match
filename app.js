@@ -254,10 +254,15 @@
   function funCard(fu) {
     if (fu && fu.none) return `<section class="card fun"><h3>Combiné fun 🎲</h3><p>Pas de combiné fun pour l'instant : ${fu.eligible} match(s) seulement passent les garde-fous (5 minimum : ≥ 20 matchs d'historique par équipe, modèle à ≤ 10 pts du marché).</p></section>`;
     if (!fu || !(fu.legs || []).length) return "";
-    const ci = L.combineInfo(fu); const res = fu.outcome === "won" ? " · gagné ✓" : fu.outcome === "lost" ? " · perdu ✗" : "";
-    const legs = fu.legs.map(l => `<li>${L.hm(l.kickoff)} ${esc(l.home)} – ${esc(l.away)} : <b>${esc(L.shortSel(l.market, l.selection))}</b> · ${l.market_prob != null ? L.pct(l.market_prob) : L.pct(l.prob)} · ${L.odds(l.odds)}${l.outcome === "won" ? " ✓" : l.outcome === "lost" ? " ✗" : ""}</li>`).join("");
+    const ci = L.combineInfo(fu); const fxm = {}; for (const f of [...fixturesOf(prefs.date), ...fixturesOf(L.addDays(prefs.date, 1))]) fxm[f.fixture_id] = f;
+    const ICON = { won: "✅", lost: "❌", void: "↩️", live: "⏳", pending: "⏳" };
+    const sts = fu.legs.map(l => L.legStatus(l, fxm[l.fixture_id])); const sm = L.legsSummary(sts);
+    const res = sm.status === "won" ? " · gagné ✅" : sm.status === "lost" ? " · perdu ❌" : "";
+    const legs = fu.legs.map((l, i) => { const f = fxm[l.fixture_id], st = f && f.status && f.status.short, sc = f && f.score && f.score.home != null && (L.LIVE.includes(st) || L.FINISHED.includes(st)) ? ` <span class="muted">(${esc(L.statusText(f))})</span>` : "";
+      return `<li class="leg-${sts[i]}"><span class="lst" aria-label="${{ won: "gagné", lost: "perdu", void: "annulé", live: "en cours", pending: "à venir" }[sts[i]]}">${ICON[sts[i]]}</span> ${L.hm(l.kickoff)} ${esc(l.home)} – ${esc(l.away)} : <b>${esc(L.shortSel(l.market, l.selection))}</b> · ${l.market_prob != null ? L.pct(l.market_prob) : L.pct(l.prob)} · ${L.odds(l.odds)}${sc}</li>`; }).join("");
+    const sumLine = `<p class="funsum"><b>${sm.text}</b>${sm.status === "lost" ? " — combiné perdu" : sm.status === "won" ? " — combiné gagné 🎉" : ""}</p>`;
     const gain = (fu.stake_eur || 0.1) * ci.odds;
-    return `<section class="card fun"><h3>Combiné fun 🎲 🔒${res}</h3><p class="funlab">Pour le fun — mise symbolique ${L.nf(fu.stake_eur || 0.1, 2)} €. Hors bilan des tickets.</p>
+    return `<section class="card fun"><h3>Combiné fun 🎲 🔒${res}</h3><p class="funlab">Pour le fun — mise symbolique ${L.nf(fu.stake_eur || 0.1, 2)} €. Hors bilan des tickets.</p>${sumLine}
       <details><summary>${fu.legs.length} sélections · cote totale ${L.nf(ci.odds, 1)} · gain possible ${L.nf(gain, 2)} €</summary><ul class="legs">${legs}</ul></details>
       ${fu.market_probability != null ? `<p>Chances de tout gagner : <b>${fu.market_probability < 0.001 ? "< 0,1 %" : L.pct(fu.market_probability)}</b> (selon les cotes sans marge)</p>` : ""}
       <p class="muted">Modèle : ${ci.p < 0.001 ? "< 0,1 %" : L.pct(ci.p)}</p></section>`;
