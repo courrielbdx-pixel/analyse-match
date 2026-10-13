@@ -200,7 +200,7 @@
     return h;
   }
   // ---------------- Page match ----------------
-  async function matchPage(id, d) {
+  async function matchPage(id, d) { state.matchDate = d;
     const fid = +id; if (state.meta) await loadDate(d);
     const f = fixturesOf(d).find(x => x.fixture_id === fid);
     if (!f) { $app.innerHTML = header() + `<button class="back" id="back">← Retour</button><p class="empty">Match introuvable pour le ${fmtDate(d)}.</p>`; return; }
@@ -527,7 +527,27 @@
     return fx.some(f => L.LIVE.includes(f.status.short)) ? 60e3 : hot ? 5 * 60e3 : 15 * 60e3;
   }
   setInterval(() => { if (document.visibilityState === "visible" && Date.now() - state.lastMetaAt >= interval()) refresh(); }, 30e3);
-  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && Date.now() - state.lastMetaAt > 60e3) refresh(); });
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") { liveTick(true); if (Date.now() - state.lastMetaAt > 60e3) refresh(); } });
+  // ---- scores en direct : toutes les 30 s (onglet visible, match en cours ou qui commence dans 15 min), mise à jour sur place ----
+  function liveHot(d) { const t = now().getTime(); return fixturesOf(d).some(f => L.LIVE.includes(f.status.short) || (f.status.short === "NS" && Math.abs(Date.parse(f.kickoff) - t) < 15 * 60e3)); }
+  let liveBusy = false;
+  async function liveTick(force) {
+    if (liveBusy || document.visibilityState !== "visible" || SAMPLE || !(current === "agenda" || current === "match")) return;
+    const d = current === "match" ? (state.matchDate || prefs.date || L.paris(now()).date) : (prefs.date || L.paris(now()).date);
+    if (!state.data[d] || (!force && !liveHot(d))) return;
+    liveBusy = true;
+    try {
+      const r = await fetch(`${BASE}/live/${d}.json?t=${Date.now()}`, { cache: "no-store" }); if (!r.ok) return;
+      const j = await r.json(); if (!L.schemaOk(j)) return;
+      const old = JSON.stringify(state.data[d].live && state.data[d].live.live); if (JSON.stringify(j.live) === old) return;
+      state.data[d].live = j; LS.set(cacheKey(`live/${d}.json`), { at: Date.now(), data: j });
+      if (current === "agenda") {
+        for (const f of fixturesOf(d)) { const li = document.querySelector(`#list li.row[data-open="${f.fixture_id}"]`); if (!li) continue;
+          const tmp = document.createElement("ul"); tmp.innerHTML = row(f, !!li.querySelector(".une")); const nw = tmp.firstElementChild; if (nw && nw.innerHTML !== li.innerHTML) li.replaceWith(nw); }
+      } else { const y = window.scrollY; await route(); window.scrollTo(0, y); }
+    } catch (e) { } finally { liveBusy = false; }
+  }
+  setInterval(() => liveTick(false), 30e3);
   if ("serviceWorker" in navigator && location.protocol !== "file:") {
     const hadCtl = !!navigator.serviceWorker.controller; let reloaded = false;
     navigator.serviceWorker.addEventListener("controllerchange", () => { if (hadCtl && !reloaded) { reloaded = true; location.reload(); } });
