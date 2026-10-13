@@ -233,7 +233,7 @@
     return `<section class="card combi"><h3>Combiné du jour 🔒${res}</h3><ul class="legs">${legs}</ul><p>Proba modèle combinée : <b>${L.pct(ci.p)}</b> · Cote totale : <b>${L.odds(ci.odds)}</b> · EV ${L.signedPct(ci.ev)}</p>${note}</section>`;
   }
   function funCard(fu) {
-    if (fu && fu.none) return `<section class="card fun"><h3>Combiné fun 🎲</h3><p>Pas de combiné fun pour l'instant : ${fu.eligible} match(s) seulement passent les garde-fous (10 minimum : ≥ 20 matchs d'historique par équipe, modèle à ≤ 10 pts du marché).</p></section>`;
+    if (fu && fu.none) return `<section class="card fun"><h3>Combiné fun 🎲</h3><p>Pas de combiné fun pour l'instant : ${fu.eligible} match(s) seulement passent les garde-fous (5 minimum : ≥ 20 matchs d'historique par équipe, modèle à ≤ 10 pts du marché).</p></section>`;
     if (!fu || !(fu.legs || []).length) return "";
     const ci = L.combineInfo(fu); const res = fu.outcome === "won" ? " · gagné ✓" : fu.outcome === "lost" ? " · perdu ✗" : "";
     const legs = fu.legs.map(l => `<li>${L.hm(l.kickoff)} ${esc(l.home)} – ${esc(l.away)} : <b>${esc(L.shortSel(l.market, l.selection))}</b> · ${l.market_prob != null ? L.pct(l.market_prob) : L.pct(l.prob)} · ${L.odds(l.odds)}${l.outcome === "won" ? " ✓" : l.outcome === "lost" ? " ✗" : ""}</li>`).join("");
