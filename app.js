@@ -520,6 +520,7 @@
     await loadMeta();
     const changed = !state.meta || JSON.stringify(state.meta.files || {}) !== before || state.meta.generated_at !== prevGen;
     if (changed && (current === "agenda" || current === "match")) { const y = window.scrollY; await route(); window.scrollTo(0, y); } else { footer(); const hd = document.querySelector("header.top"); if (hd) { const tmp = document.createElement("div"); tmp.innerHTML = header(); hd.replaceWith(tmp.firstElementChild); } }
+    liveTick(true);
   }
   function interval() {
     const d = prefs.date || L.paris(now()).date; const fx = fixturesOf(d); const t = now().getTime();
@@ -539,6 +540,15 @@
     try {
       const r = await fetch(`${BASE}/live/${d}.json?t=${Date.now()}`, { cache: "no-store" }); if (!r.ok) return;
       const j = await r.json(); if (!L.schemaOk(j)) return;
+      // ESPN en direct (CORS ouvert, cache 9 s) pour les matchs en cours qui ont un identifiant ESPN ; le fichier publié reste la base
+      const fin = ["FT", "AET", "PEN", "CANC", "ABD", "AWD", "WO", "PST"]; const want = j.live.filter(e => e.espn && !fin.includes(e.status.short));
+      const keys = [...new Set(want.map(e => `${e.espn.slug}|${e.espn.ymd}`))];
+      const evs = {};
+      await Promise.all(keys.map(async k => { const [slug, ymd] = k.split("|"); try { const x = await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/${slug}/scoreboard?dates=${ymd}`, { cache: "no-store" }); if (x.ok) for (const ev of (await x.json()).events || []) evs[ev.id] = ev; } catch (e) { } }));
+      const nowIso = new Date().toISOString();
+      for (const e of want) { const ev = evs[e.espn.id]; if (!ev) continue; const s = L.espnStatus(ev); if (!s) continue;
+        const c = {}; for (const t of ev.competitions[0].competitors) c[t.homeAway] = +t.score;
+        e.status = s; e.score = { home: c.home, away: c.away }; e.updated_at = nowIso; }
       const old = JSON.stringify(state.data[d].live && state.data[d].live.live); if (JSON.stringify(j.live) === old) return;
       state.data[d].live = j; LS.set(cacheKey(`live/${d}.json`), { at: Date.now(), data: j });
       if (current === "agenda") {

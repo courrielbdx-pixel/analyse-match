@@ -56,6 +56,16 @@
     return { reading: pub, anomaly: null, readings: rs };
   }
   function laterReadings(fr) { const r = fr && fr.reading; if (!r) return []; return (fr.readings || []).filter(x => Date.parse(x.timestamp) > Date.parse(r.timestamp) && x.reading_id !== r.reading_id); }
+  // ---- statut ESPN -> statut du site (même règle que live_tick.py) ----
+  function espnStatus(ev) {
+    const st = ev.status || {}, ty = st.type || {}, name = ty.name || "", per = st.period || 0; const m = /(\d+)/.exec(st.displayClock || ""); const el = m ? +m[1] : null;
+    if (ty.state === "pre") return null;
+    if (ty.state === "post" || ty.completed) return { short: /PEN/.test(name) ? "PEN" : /AET|EXTRA/.test(name) ? "AET" : "FT", elapsed: /AET|PEN/.test(name) ? 120 : 90 };
+    if (/HALFTIME/.test(name)) return { short: "HT", elapsed: 45 };
+    if (/SHOOTOUT/.test(name)) return { short: "P", elapsed: 120 };
+    if (/POSTPONED|CANCELED|SUSPENDED|ABANDONED/.test(name)) return null;
+    return { short: per <= 1 ? "1H" : per === 2 ? "2H" : "ET", elapsed: el };
+  }
   // ---- combiné du jour (TICKETs officiels uniquement) ----
   function combineInfo(c) {
     if (!c || !(c.legs || []).length || c.legs.length < 2) return { none: true, text: "Pas de combiné aujourd'hui : moins de 2 tickets validés" };
@@ -211,7 +221,7 @@
     const ms = now.getTime() - Date.parse(gen); if (ms <= 3 * 3600e3) return null; return durationText(ms);
   }
   function durationText(ms) { const m = Math.round(ms / 60000); if (m < 60) return `${m} min`; const h = Math.floor(m / 60), r = m % 60; return r ? `${h} h ${String(r).padStart(2, "0")}` : `${h} h`; }
-  const API = { paris, addDays, dateBar, dayLabel, pct, units, odds, signedPct, nf, shortSel, affiches, heure, nuit, regionFilter, finalReading, recheck, outcome, mergeLive, statusText, hm, nextReading, laterReadings, combineInfo,
+  const API = { paris, addDays, dateBar, dayLabel, pct, units, odds, signedPct, nf, shortSel, affiches, heure, nuit, regionFilter, finalReading, recheck, outcome, mergeLive, statusText, hm, nextReading, laterReadings, combineInfo, espnStatus,
     suivisSplit, exportSuivis, importSuivis, isoWeek, summarize, filterSettled, breakdown, calibration, cumulative, valueSentence, compareAggregates, paperCount, bucketOf,
     schemaOk, validFixture, staleText, durationText, offsetFor, FINISHED, LIVE };
   if (typeof module !== "undefined" && module.exports) module.exports = API; else root.AMLogic = API;

@@ -89,3 +89,8 @@ test("combiné : moins de 2 tickets → message ; sinon produit des probas et de
   assert.ok(Math.abs(c.odds - 3.06) < 1e-9 && Math.abs(c.p - 0.36) < 1e-9 && Math.abs(c.ev - (0.36 * 3.06 - 1)) < 1e-9);
 });
 test("SKIP : 2e ligne résultat/BTTS (libellé court)", () => { assert.strictEqual(L.shortSel("DC", "12"), "12"); assert.strictEqual(L.shortSel("BTTS", "no"), "BTTS non"); });
+test("statut ESPN", () => {
+  assert.deepStrictEqual(L.espnStatus({ status: { period: 2, displayClock: "62'", type: { state: "in", name: "STATUS_SECOND_HALF" } } }), { short: "2H", elapsed: 62 });
+  assert.deepStrictEqual(L.espnStatus({ status: { type: { state: "in", name: "STATUS_HALFTIME" } } }), { short: "HT", elapsed: 45 });
+  assert.strictEqual(L.espnStatus({ status: { type: { state: "pre", name: "STATUS_SCHEDULED" } } }), null);
+});
