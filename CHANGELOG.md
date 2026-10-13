@@ -9,3 +9,6 @@
 ## v6.0.22 — 2026-10-13
 - **Demande** : idées GitHub (penaltyblog, sports-betting, scikit-learn) validées par Bruno.
 - **Ce qui a changé** : Bilan → cartes « Cote de clôture (CLV) », « Bankroll simulée (Kelly 1/4, plafond 2 %) » et section « Fiabilité du modèle » (calibration, Brier, log-loss vs bookmakers, backtest + matchs réels). Page match : poids des absents (part des xG+xA, Understat, Big 5). Aucun ticket ni règle modifié.
+
+## v6.0.23 — 2026-10-13
+- Bankroll Kelly 1/4 : 4 lignes (Tickets, SKIP Probable, Résultat, Valeur), colonnes paris misés / sans mise, note explicative.
