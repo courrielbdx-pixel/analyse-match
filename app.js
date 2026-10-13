@@ -233,13 +233,15 @@
     return `<section class="card combi"><h3>Combiné du jour 🔒${res}</h3><ul class="legs">${legs}</ul><p>Proba modèle combinée : <b>${L.pct(ci.p)}</b> · Cote totale : <b>${L.odds(ci.odds)}</b> · EV ${L.signedPct(ci.ev)}</p>${note}</section>`;
   }
   function funCard(fu) {
+    if (fu && fu.none) return `<section class="card fun"><h3>Combiné fun 🎲</h3><p>Pas de combiné fun pour l'instant : ${fu.eligible} match(s) seulement passent les garde-fous (10 minimum : ≥ 20 matchs d'historique par équipe, modèle à ≤ 10 pts du marché).</p></section>`;
     if (!fu || !(fu.legs || []).length) return "";
     const ci = L.combineInfo(fu); const res = fu.outcome === "won" ? " · gagné ✓" : fu.outcome === "lost" ? " · perdu ✗" : "";
-    const legs = fu.legs.map(l => `<li>${L.hm(l.kickoff)} ${esc(l.home)} – ${esc(l.away)} : <b>${esc(L.shortSel(l.market, l.selection))}</b> · ${L.pct(l.prob)} · ${L.odds(l.odds)}${l.outcome === "won" ? " ✓" : l.outcome === "lost" ? " ✗" : ""}</li>`).join("");
+    const legs = fu.legs.map(l => `<li>${L.hm(l.kickoff)} ${esc(l.home)} – ${esc(l.away)} : <b>${esc(L.shortSel(l.market, l.selection))}</b> · ${l.market_prob != null ? L.pct(l.market_prob) : L.pct(l.prob)} · ${L.odds(l.odds)}${l.outcome === "won" ? " ✓" : l.outcome === "lost" ? " ✗" : ""}</li>`).join("");
     const gain = (fu.stake_eur || 0.1) * ci.odds;
     return `<section class="card fun"><h3>Combiné fun 🎲 🔒${res}</h3><p class="funlab">Pour le fun — mise symbolique ${L.nf(fu.stake_eur || 0.1, 2)} €. Hors bilan des tickets.</p>
       <details><summary>${fu.legs.length} sélections · cote totale ${L.nf(ci.odds, 1)} · gain possible ${L.nf(gain, 2)} €</summary><ul class="legs">${legs}</ul></details>
-      <p>Proba modèle combinée : <b>${ci.p < 0.001 ? "< 0,1 %" : L.pct(ci.p)}</b> (honnête : presque toujours perdant) · EV ${L.signedPct(ci.ev)}</p></section>`;
+      ${fu.market_probability != null ? `<p>Chances de tout gagner : <b>${fu.market_probability < 0.001 ? "< 0,1 %" : L.pct(fu.market_probability)}</b> (selon les cotes sans marge)</p>` : ""}
+      <p class="muted">Modèle : ${ci.p < 0.001 ? "< 0,1 %" : L.pct(ci.p)}</p></section>`;
   }
   function copyBtn(f) { return `<button class="copy" data-copy="Relance l'analyse du match ${f.fixture_id} ${esc(f.home.name)}–${esc(f.away.name)} (${esc(f.kickoff)}) — raison : ">Copier une demande de relecture</button>`; }
   function rapport(f, r, fr) {
