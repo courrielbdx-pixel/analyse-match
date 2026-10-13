@@ -392,7 +392,7 @@
       h += `<section class="card"><h3>Méthode en cours : ${esc(m.method.name)} (${esc(m.method.version)})</h3><p>${esc(m.method.description_fr || "")}</p><ul>${(m.rules.text_fr || []).map(x => `<li>${esc(x)}</li>`).join("")}</ul>`;
       const c = m.rules.ticket_criteria || {};
       h += `<h3>Critères TICKET</h3><ul><li>EV ≥ ${L.pct(c.min_ev, 0)}</li><li>Écart modèle / marché ≤ ${L.nf((c.max_gap_market || 0) * 100, 0)} points</li><li>Probabilité du modèle ≥ ${L.pct(c.min_prob, 0)}</li><li>Cote ≤ ${L.odds(c.max_odds)}</li><li>≥ ${c.min_team_matches} matchs par équipe</li></ul>
-        <h3>Marchés autorisés</h3><p>${(m.rules.allowed_markets || []).map(esc).join(", ")}</p></section>`;
+        <h3>Marchés autorisés</h3><p>${(m.rules.allowed_markets || []).map(k => esc(({ "1X2": "1N2", "DC": "Double chance (1N, N2, 12)", "OU1.5": "+/−1,5", "OU2.5": "+/−2,5", "OU3.5": "+/−3,5", "BTTS": "Les deux marquent", "HT1X2": "Résultat à la mi-temps" })[k] || L.shortSel(k, "yes"))).join(", ")}</p></section>`;
       h += `<section class="card"><h3>Versions de la méthode</h3><ul>${(m.methods_history || []).map(x => `<li>${esc(x.version)} : du ${fmtFr(x.from)}${x.to ? " au " + fmtFr(x.to) : " à aujourd'hui"} — ${esc(x.description_fr || "")}</li>`).join("")}</ul><p>Remettre le bilan à zéro n'est pas un bouton du site : c'est la publication d'une nouvelle version de la méthode par Grok Bot. Les anciennes versions restent consultables dans le Bilan, sans jamais être additionnées.</p></section>`;
       h += `<section class="card"><h3>Compétitions et zones exclues</h3><p>${(m.exclusions || []).map(esc).join(", ")}</p></section>`;
     }
