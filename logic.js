@@ -42,6 +42,13 @@
   }
   function heure(list, date, region) { return regionFilter(onDate(list, date), region).slice().sort(byTime); }
   function nuit(list, date, region) { return heure(list, date, region).filter(f => paris(f.kickoff).hour < 8); }
+  // ---- vérification X des SKIP quasi-ticket (info) ----
+  function skipTag(sc) {
+    if (!sc) return null;
+    if (sc.status === "confirmed") return { text: "Vérifié ✓", cls: "ok" };
+    if (sc.status === "cancelled") return { text: `Annulé (info : ${sc.reason_fr || "info contradictoire"})`, cls: "ko" };
+    return { text: "Vérification X en attente", cls: "wait" };
+  }
   // ---- lecture finale ----
   function finalReading(entry, kickoff) {
     const rs = (entry && entry.readings || []).slice().sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp));
@@ -221,7 +228,7 @@
     const ms = now.getTime() - Date.parse(gen); if (ms <= 3 * 3600e3) return null; return durationText(ms);
   }
   function durationText(ms) { const m = Math.round(ms / 60000); if (m < 60) return `${m} min`; const h = Math.floor(m / 60), r = m % 60; return r ? `${h} h ${String(r).padStart(2, "0")}` : `${h} h`; }
-  const API = { paris, addDays, dateBar, dayLabel, pct, units, odds, signedPct, nf, shortSel, affiches, heure, nuit, regionFilter, finalReading, recheck, outcome, mergeLive, statusText, hm, nextReading, laterReadings, combineInfo, espnStatus,
+  const API = { paris, addDays, dateBar, dayLabel, pct, units, odds, signedPct, nf, shortSel, affiches, heure, nuit, regionFilter, finalReading, recheck, outcome, mergeLive, statusText, hm, nextReading, laterReadings, combineInfo, espnStatus, skipTag,
     suivisSplit, exportSuivis, importSuivis, isoWeek, summarize, filterSettled, breakdown, calibration, cumulative, valueSentence, compareAggregates, paperCount, bucketOf,
     schemaOk, validFixture, staleText, durationText, offsetFor, FINISHED, LIVE };
   if (typeof module !== "undefined" && module.exports) module.exports = API; else root.AMLogic = API;

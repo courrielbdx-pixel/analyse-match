@@ -56,3 +56,5 @@ code{font-size:12px;overflow-wrap:anywhere}
 .combi h3{margin:0 0 6px}.combi .legs{margin:0 0 6px;padding-left:18px}.combi .legs li{margin:4px 0}.cbn{font-size:12px}
 .fun{border:2px dashed #c9a400;background:rgba(201,164,0,.07);margin-top:14px}.fun .funlab{font-weight:700;color:#a07f00;margin:0 0 6px}
 .row .alt{display:block;font-size:12px;color:var(--mut)}p.alt{margin:4px 0}
+
+.xtag{display:inline-block;margin-left:.35em;padding:0 .4em;border-radius:.6em;font-size:.85em;font-weight:600}.xtag.ok{background:#e3f5e8;color:#17663a}.xtag.ko{background:#fde8e8;color:#9b1c1c}.xtag.wait{background:#eef0f4;color:#555}

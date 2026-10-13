@@ -94,3 +94,10 @@ test("statut ESPN", () => {
   assert.deepStrictEqual(L.espnStatus({ status: { type: { state: "in", name: "STATUS_HALFTIME" } } }), { short: "HT", elapsed: 45 });
   assert.strictEqual(L.espnStatus({ status: { type: { state: "pre", name: "STATUS_SCHEDULED" } } }), null);
 });
+
+test("tag vérification X SKIP", () => {
+  assert.strictEqual(L.skipTag(null), null);
+  assert.strictEqual(L.skipTag({ status: "confirmed" }).text, "Vérifié ✓");
+  assert.strictEqual(L.skipTag({ status: "cancelled", reason_fr: "gardien titulaire forfait" }).text, "Annulé (info : gardien titulaire forfait)");
+  assert.strictEqual(L.skipTag({ status: "pending" }).cls, "wait");
+});

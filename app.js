@@ -126,7 +126,7 @@
           <span class="lgl"><span class="cc">${esc(f.league.country_code || "")}</span> ${leagueLabel(f)}${une ? ` <span class="une">À la une</span>` : ""}</span>
           <span class="tm">${logo(f.home)}<span class="nm">${esc(f.home.name)}</span></span>
           <span class="tm">${logo(f.away)}<span class="nm">${esc(f.away.name)}</span></span>
-          <span class="bd">${badge(r, true)}${r && r.lineups_confirmed ? ` <span class="compo">compo ✓</span>` : ""}${res}</span>${altLine(r, true)}${valLine(r, true)}
+          <span class="bd">${badge(r, true)}${r && r.lineups_confirmed ? ` <span class="compo">compo ✓</span>` : ""}${res}</span>${altLine(r, true)}${valLine(r, true, f._pick && f._pick.skip_check)}
         </span>
       </a>${star(f)}</li>`;
   }
@@ -231,11 +231,12 @@
     return short ? `<span class="alt">Résultat : ${esc(L.shortSel(x.market, x.selection))} ${L.pct(x.model_probability)}${o}</span>`
                  : `<p class="alt">Côté résultat / BTTS : <b>${esc(x.label_fr)}</b> · ${L.pct(x.model_probability)} (marché ${L.pct(x.market_probability)})${x.odds ? ` · cote ${L.odds(x.odds)} (${esc(x.bookmaker)})` : ""}</p>`;
   }
-  function valLine(r, short) {
+  function valLine(r, short, sc) {
     const x = r && r.label === "SKIP" && r.value_pick; if (!x) return "";
     const t = `${L.pct(x.model_probability)} · cote ${L.odds(x.odds)} · EV ${L.signedPct(x.ev)}`;
-    return short ? `<span class="alt val">Valeur (info) : ${esc(L.shortSel(x.market, x.selection))} ${t}</span>`
-                 : `<p class="alt val">Valeur (information, pas un ticket) : <b>${esc(x.label_fr)}</b> · ${t} (${esc(x.bookmaker)}) · marché ${L.pct(x.market_probability)}</p>`;
+    const tg = L.skipTag(sc); const tag = tg ? ` <span class="xtag ${tg.cls}">${esc(tg.text)}</span>` : "";
+    return short ? `<span class="alt val">Valeur (info) : ${esc(L.shortSel(x.market, x.selection))} ${t}${tag}</span>`
+                 : `<p class="alt val">Valeur (information, pas un ticket) : <b>${esc(x.label_fr)}</b> · ${t} (${esc(x.bookmaker)}) · marché ${L.pct(x.market_probability)}${tag}</p>${sc ? `<p class="muted">Quasi-ticket (rate une seule règle : ${esc(sc.rule_fr)}) — vérifié sur X auprès de sources fiables. Information seulement : ne crée jamais de ticket.</p>` : ""}`;
   }
   function combineCard(c) {
     const ci = L.combineInfo(c); const note = `<p class="muted cbn">Construit uniquement avec les TICKETs validés : la marge du bookmaker se multiplie à chaque sélection, un combiné de picks faibles perd donc plus vite.</p>`;
@@ -266,7 +267,7 @@
       <p><span class="tip" title="Probabilité calculée par le modèle Dixon-Coles pour cette sélection. Ce n'est pas une garantie.">Probabilité du modèle : ${L.pct(r.model_probability)}</span></p>
       <p class="muted">${esc(TRIG[r.trigger] || r.trigger)} · ${L.paris(r.timestamp).time} · Compos officielles : ${r.lineups_confirmed ? "oui" : "non"}</p>`;
     if (!hasCompo && ko > 0 && ko < 90 * 60e3 && fr.readings.some(x => x.trigger === "matin")) h += `<p class="note">En attente des compos officielles (relecture automatique par Grok Bot)</p>`;
-    h += altLine(r, false) + valLine(r, false);
+    h += altLine(r, false) + valLine(r, false, f._pick && f._pick.skip_check);
     const lat = r.label === "TICKET" ? L.laterReadings(fr) : [];
     if (lat.length) { const x = lat[lat.length - 1]; h += `<p class="muted relect">Relecture (info) ${L.paris(x.timestamp).time} : ${x.label} ${esc(x.pick.label_fr)} (${L.pct(x.model_probability)}) — le ticket officiel reste ${esc(r.pick.label_fr)}.</p>`; }
     if (r.label === "SKIP" && (r.skip_reasons_fr || []).length) h += `<ul class="reasons">${r.skip_reasons_fr.map(x => `<li>${esc(x)}</li>`).join("")}</ul>`;
