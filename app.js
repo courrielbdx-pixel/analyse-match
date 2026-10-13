@@ -220,7 +220,7 @@
       h += `<section class="card"><p>${txt}</p>${copyBtn(f)}</section>`;
     } else {
       h += rapport(f, r, fr);
-      h += history(fr.readings, r);
+      h += history(fr.readings, r, L.paris(f.kickoff).date);
     }
     if (det) h += contexte(f, det) + classement(f, det);
     $app.innerHTML = header() + h; window.scrollTo(0, 0);
@@ -288,15 +288,15 @@
     const ts = (r.top_scores || []).length ? `<p>Scores les plus probables (indicatif) : ${r.top_scores.map(x => `${esc(x.score)} (${L.pct(x.p)})`).join(", ")}</p>` : "";
     return `<details class="probs"><summary>Probabilités du modèle</summary><div class="hscroll"><table>${rows}</table></div>${xg}${ts}</details>`;
   }
-  function history(rs, fin) {
+  function history(rs, fin, ref) {
     let prev = null;
+    rs = rs.slice().sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp));
     const li = rs.map(r => {
       const sel = L.shortSel(r.pick.market, r.pick.selection);
-      let ch = "";
-      if (prev) { const pc = prev.pick.market !== r.pick.market || prev.pick.selection !== r.pick.selection, lc = prev.label !== r.label;
-        if (pc || lc) ch = `<div class="chg">${pc ? `${esc(L.shortSel(prev.pick.market, prev.pick.selection))} → ${esc(sel)}` : ""}${pc && lc ? " · " : ""}${lc ? `${prev.label} → ${r.label}` : ""}${r.change_from_previous && r.change_from_previous.reason_fr ? ` — ${esc(r.change_from_previous.reason_fr)}` : ""}</div>`; }
+      const c = L.histChange(prev, r);
+      const ch = c ? `<div class="chg">${esc(c.text)}${c.title ? ` · ${esc(c.title)}` : ""} — <i>${esc(c.reason)}</i></div>` : "";
       prev = r;
-      return `<li${r === fin ? ' class="final"' : ""}>${esc(TRIG[r.trigger] || r.trigger)} · ${L.paris(r.timestamp).time} — ${esc(sel)} · ${r.label} · ${L.pct(r.model_probability)}${r === fin ? " — <i>Lecture finale</i>" : ""}${ch}</li>`;
+      return `<li${r === fin ? ' class="final"' : ""}>${esc(TRIG[r.trigger] || r.trigger)} · ${L.histWhen(r.timestamp, ref)} — ${esc(sel)} · ${r.label} · ${L.pct(r.model_probability)}${r === fin ? " — <i>Lecture finale</i>" : ""}${ch}</li>`;
     }).join("");
     return `<section class="card"><h2>Suivi des lectures <span class="cnt">${rs.length} lecture${rs.length > 1 ? "s" : ""}</span></h2><ol class="hist">${li}</ol></section>`;
   }

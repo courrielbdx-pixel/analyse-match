@@ -49,6 +49,23 @@
     if (sc.status === "cancelled") return { text: `Annulé (info : ${sc.reason_fr || "info contradictoire"})`, cls: "ko" };
     return { text: "Vérification X en attente", cls: "wait" };
   }
+  // ---- suivi des lectures ----
+  const SKIP_RULE_TS = Date.parse("2026-10-13T10:00:00+02:00"); // titre SKIP = plus probable (avant : EV max)
+  function histChange(prev, r) {
+    if (!prev) return null;
+    const pc = prev.pick.market !== r.pick.market || prev.pick.selection !== r.pick.selection, lc = prev.label !== r.label;
+    if (!pc && !lc) return null;
+    const parts = [];
+    if (pc) {
+      const m = prev.pick.market, s = prev.pick.selection, p1 = prev.model_probability, p2 = r.probabilities && r.probabilities[m] ? r.probabilities[m][s] : null;
+      parts.push(`${shortSel(m, s)} ${pct(p1)} → ${p2 != null ? pct(p2) : "—"}`);
+    }
+    if (lc) parts.push(`${prev.label} → ${r.label}`);
+    const rule = pc && !lc && r.label === "SKIP" && Date.parse(prev.timestamp) < SKIP_RULE_TS && Date.parse(r.timestamp) >= SKIP_RULE_TS;
+    const title = pc ? `titre : ${shortSel(r.pick.market, r.pick.selection)}` : "";
+    return { text: parts.join(" · "), title, reason: rule ? "Changement d'affichage (règle SKIP du 13/10)" : (lc ? "Nouvelle lecture" : "Nouvelle sélection en tête"), rule };
+  }
+  function histWhen(ts, refDate) { const p = paris(ts); return p.date !== refDate ? `${p.date.slice(8, 10)}/${p.date.slice(5, 7)} ${p.time}` : p.time; }
   // ---- lecture finale ----
   function finalReading(entry, kickoff) {
     const rs = (entry && entry.readings || []).slice().sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp));
@@ -228,7 +245,7 @@
     const ms = now.getTime() - Date.parse(gen); if (ms <= 3 * 3600e3) return null; return durationText(ms);
   }
   function durationText(ms) { const m = Math.round(ms / 60000); if (m < 60) return `${m} min`; const h = Math.floor(m / 60), r = m % 60; return r ? `${h} h ${String(r).padStart(2, "0")}` : `${h} h`; }
-  const API = { paris, addDays, dateBar, dayLabel, pct, units, odds, signedPct, nf, shortSel, affiches, heure, nuit, regionFilter, finalReading, recheck, outcome, mergeLive, statusText, hm, nextReading, laterReadings, combineInfo, espnStatus, skipTag,
+  const API = { paris, addDays, dateBar, dayLabel, pct, units, odds, signedPct, nf, shortSel, affiches, heure, nuit, regionFilter, finalReading, recheck, outcome, mergeLive, statusText, hm, nextReading, laterReadings, combineInfo, espnStatus, skipTag, histChange, histWhen,
     suivisSplit, exportSuivis, importSuivis, isoWeek, summarize, filterSettled, breakdown, calibration, cumulative, valueSentence, compareAggregates, paperCount, bucketOf,
     schemaOk, validFixture, staleText, durationText, offsetFor, FINISHED, LIVE };
   if (typeof module !== "undefined" && module.exports) module.exports = API; else root.AMLogic = API;

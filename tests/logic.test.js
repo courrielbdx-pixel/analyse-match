@@ -101,3 +101,14 @@ test("tag vérification X SKIP", () => {
   assert.strictEqual(L.skipTag({ status: "cancelled", reason_fr: "gardien titulaire forfait" }).text, "Annulé (info : gardien titulaire forfait)");
   assert.strictEqual(L.skipTag({ status: "pending" }).cls, "wait");
 });
+
+test("suivi : même marché comparé, changement de règle SKIP, date", () => {
+  const P = (x2, o15) => ({ DC: { "1X": 0.6, X2: x2, "12": 0.7 }, "OU1.5": { over: o15, under: 1 - o15 } });
+  const a = { timestamp: "2026-10-13T07:09:33+02:00", label: "SKIP", pick: { market: "DC", selection: "X2" }, model_probability: 0.589, probabilities: P(0.589, 0.75) };
+  const b = { timestamp: "2026-10-13T11:21:56+02:00", label: "SKIP", pick: { market: "OU1.5", selection: "over" }, model_probability: 0.757, probabilities: P(0.613, 0.757) };
+  const c = L.histChange(a, b);
+  assert.strictEqual(c.text, "N2 58,9 % → 61,3 %"); assert.ok(c.rule); assert.strictEqual(c.reason, "Changement d'affichage (règle SKIP du 13/10)");
+  assert.strictEqual(L.histChange(a, a), null);
+  assert.strictEqual(L.histWhen("2026-10-12T17:42:08+02:00", "2026-10-13"), "12/10 17:42");
+  assert.strictEqual(L.histWhen("2026-10-13T07:09:33+02:00", "2026-10-13"), "07:09");
+});
