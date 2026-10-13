@@ -56,6 +56,12 @@
     return { reading: pub, anomaly: null, readings: rs };
   }
   function laterReadings(fr) { const r = fr && fr.reading; if (!r) return []; return (fr.readings || []).filter(x => Date.parse(x.timestamp) > Date.parse(r.timestamp) && x.reading_id !== r.reading_id); }
+  // ---- combiné du jour (TICKETs officiels uniquement) ----
+  function combineInfo(c) {
+    if (!c || !(c.legs || []).length || c.legs.length < 2) return { none: true, text: "Pas de combiné aujourd'hui : moins de 2 tickets validés" };
+    const odds = c.legs.reduce((a, l) => a * l.odds, 1), p = c.legs.reduce((a, l) => a * l.prob, 1);
+    return { none: false, legs: c.legs, odds, p, ev: p * odds - 1, outcome: c.outcome || null };
+  }
   // ---- revérification cohérence (COH-01, 02, 03, 04, 07) ----
   function recheck(r, rules) {
     const fails = []; const P = r.probabilities || {}; const m = r.pick && r.pick.market, s = r.pick && r.pick.selection;
@@ -205,7 +211,7 @@
     const ms = now.getTime() - Date.parse(gen); if (ms <= 3 * 3600e3) return null; return durationText(ms);
   }
   function durationText(ms) { const m = Math.round(ms / 60000); if (m < 60) return `${m} min`; const h = Math.floor(m / 60), r = m % 60; return r ? `${h} h ${String(r).padStart(2, "0")}` : `${h} h`; }
-  const API = { paris, addDays, dateBar, dayLabel, pct, units, odds, signedPct, nf, shortSel, affiches, heure, nuit, regionFilter, finalReading, recheck, outcome, mergeLive, statusText, hm, nextReading, laterReadings,
+  const API = { paris, addDays, dateBar, dayLabel, pct, units, odds, signedPct, nf, shortSel, affiches, heure, nuit, regionFilter, finalReading, recheck, outcome, mergeLive, statusText, hm, nextReading, laterReadings, combineInfo,
     suivisSplit, exportSuivis, importSuivis, isoWeek, summarize, filterSettled, breakdown, calibration, cumulative, valueSentence, compareAggregates, paperCount, bucketOf,
     schemaOk, validFixture, staleText, durationText, offsetFor, FINISHED, LIVE };
   if (typeof module !== "undefined" && module.exports) module.exports = API; else root.AMLogic = API;

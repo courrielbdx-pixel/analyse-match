@@ -64,7 +64,7 @@
   async function loadDate(d, force) {
     const m = state.meta; const stamps = m && m.files && m.files[d] || {};
     const cur = state.data[d] || {}; const out = Object.assign({}, cur);
-    for (const kind of ["fixtures", "picks", "live"]) {
+    for (const kind of ["fixtures", "picks", "live", "combine"]) {
       const key = `${kind}/${d}.json`;
       if (!force && cur[kind + "_loaded"] && state.loadedStamps[key] === stamps[kind]) continue;
       if (kind !== "fixtures" && m && m.files && m.files[d] && !stamps[kind] && !force) { out[kind] = null; out[kind + "_status"] = 404; out[kind + "_loaded"] = true; continue; }
@@ -181,6 +181,7 @@
     else body = suivisView(act, arch);
     if ((prefs.view === "heure" || prefs.view === "affiches") && nt.length) body += `<h3 class="sep nuit">${nuitTitle}</h3>` + list(nt);
     if ((prefs.view === "nuit" && !nt.length) || (prefs.view === "affiches" && !aff.rows.length)) body += `<p class="empty">Aucun match.</p>`;
+    if ((prefs.view === "affiches" || prefs.view === "heure") && x.fixtures) body = combineCard(x.combine && x.combine.combine) + body;
     if (x.picks_status === 404 && prefs.view !== "suivis" && x.fixtures) body = `<p class="note">Lectures pas encore publiées pour le ${fmtDate(d)}.</p>` + body;
     $app.innerHTML = header() + `<nav class="dates" aria-label="Dates">${dates}</nav><div class="views">${views}</div><div class="filters">${regs}</div><section id="list">${body}</section>`;
     restoreScroll();
@@ -223,6 +224,13 @@
     }
     if (det) h += contexte(f, det) + classement(f, det);
     $app.innerHTML = header() + h; window.scrollTo(0, 0);
+  }
+  function combineCard(c) {
+    const ci = L.combineInfo(c); const note = `<p class="muted cbn">Construit uniquement avec les TICKETs validés : la marge du bookmaker se multiplie à chaque sélection, un combiné de picks faibles perd donc plus vite.</p>`;
+    if (ci.none) return `<section class="card combi"><h3>Combiné du jour</h3><p>${ci.text}.</p>${note}</section>`;
+    const res = ci.outcome === "won" ? " · gagné ✓" : ci.outcome === "lost" ? " · perdu ✗" : "";
+    const legs = ci.legs.map(l => `<li><a href="#/match/${l.fixture_id}?d=${esc(prefs.date || "")}">${L.hm(l.kickoff)} ${esc(l.home)} – ${esc(l.away)}</a><br><b>${esc(l.label_fr)}</b> · ${L.pct(l.prob)} · cote ${L.odds(l.odds)} (${esc(l.bookmaker)})${l.outcome === "won" ? " ✓" : l.outcome === "lost" ? " ✗" : ""}</li>`).join("");
+    return `<section class="card combi"><h3>Combiné du jour 🔒${res}</h3><ul class="legs">${legs}</ul><p>Proba modèle combinée : <b>${L.pct(ci.p)}</b> · Cote totale : <b>${L.odds(ci.odds)}</b> · EV ${L.signedPct(ci.ev)}</p>${note}</section>`;
   }
   function copyBtn(f) { return `<button class="copy" data-copy="Relance l'analyse du match ${f.fixture_id} ${esc(f.home.name)}–${esc(f.away.name)} (${esc(f.kickoff)}) — raison : ">Copier une demande de relecture</button>`; }
   function rapport(f, r, fr) {
@@ -308,6 +316,7 @@
       ${per === "perso" ? `<label>Du <input type="date" id="pfrom" value="${esc(prefs.pfrom || mh.from)}"></label><label>Au <input type="date" id="pto" value="${esc(prefs.pto || today)}"></label>` : ""}</div>`;
     let h = `<h2 class="pt">Bilan</h2>${sel}`;
     if (paperN < th.paper_min_tickets) h += `<div class="banner paper">Mode papier — échantillon insuffisant : ${paperN} / ${th.paper_min_tickets} tickets réglés. Ne pas considérer ces résultats comme une preuve.<div class="prog" role="progressbar" aria-valuemin="0" aria-valuemax="${th.paper_min_tickets}" aria-valuenow="${paperN}"><i data-w="${Math.min(100, paperN / th.paper_min_tickets * 100)}"></i></div></div>`;
+    const ca = r.data.combines_aggregate; if (ca) h += `<section class="card"><h3>Combiné du jour</h3><p>${ca.settled} réglé(s) sur ${ca.n} · réussite ${ca.hit_rate == null ? "—" : L.pct(ca.hit_rate)} · ROI papier ${ca.roi == null ? "—" : L.signedPct(ca.roi)} (${ca.pl_units >= 0 ? "+" : ""}${L.nf(ca.pl_units, 2)} u)</p></section>`;
     if (per === "debut") {
       const diffs = L.compareAggregates(L.summarize(L.filterSettled(r.data.settled, mv, null, null).filter(x => x.label === "TICKET")), L.summarize(L.filterSettled(r.data.settled, mv, null, null).filter(x => x.label === "SKIP")), r.data.aggregates && r.data.aggregates[mv]);
       diag.bilanDiff = diffs.map(x => `${mv} ${x.field} : ${x.detail}`);

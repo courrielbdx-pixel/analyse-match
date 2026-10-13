@@ -82,3 +82,9 @@ test("résultats combos et mi-temps", () => {
   assert.strictEqual(L.outcome("HT1X2", "1", 1, 2, { home: 1, away: 0 }), "won"); assert.strictEqual(L.outcome("HT1X2", "X", 0, 0, null), null);
   assert.strictEqual(L.shortSel("HT1X2", "X"), "MT N");
 });
+test("combiné : moins de 2 tickets → message ; sinon produit des probas et des cotes", () => {
+  assert.strictEqual(L.combineInfo(null).text, "Pas de combiné aujourd'hui : moins de 2 tickets validés");
+  assert.ok(L.combineInfo({ legs: [{ prob: 0.6, odds: 1.8 }] }).none);
+  const c = L.combineInfo({ legs: [{ prob: 0.6, odds: 1.8 }, { prob: 0.6, odds: 1.7 }] });
+  assert.ok(Math.abs(c.odds - 3.06) < 1e-9 && Math.abs(c.p - 0.36) < 1e-9 && Math.abs(c.ev - (0.36 * 3.06 - 1)) < 1e-9);
+});
