@@ -15,3 +15,6 @@
 
 ## v6.0.24 — 2026-10-13
 - Agenda : « Masquer les matchs terminés » (mémorisé) et filtre « En direct » avec compteur mis à jour toutes les 30 s.
+
+## v6.0.25 — 2026-10-13
+- Tickets tardifs (badge 🆕 TICKET tardif, bilan séparé, ligne Kelly) et annulations H-1 (badge ⚠️ Annulé — info de dernière heure, journal des annulés).

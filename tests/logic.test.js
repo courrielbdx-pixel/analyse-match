@@ -67,7 +67,8 @@ test("verrou TICKET : une relecture SKIP ne remplace pas le ticket publié", () 
   const fr = L.finalReading({ readings: rs }, "2026-10-12T20:45:00+02:00");
   assert.strictEqual(fr.reading.reading_id, "a-r1");
   assert.strictEqual(L.laterReadings(fr)[0].reading_id, "a-r2");
-  assert.strictEqual(L.finalReading({ readings: rs, cancelled: true }, "2026-10-12T20:45:00+02:00").reading.reading_id, "a-r2");
+  const c = L.finalReading({ readings: rs, cancelled: true, cancel_reason_fr: "gardien blessé" }, "2026-10-12T20:45:00+02:00").reading;
+  assert.strictEqual(c.reading_id, "a-r1"); assert.strictEqual(c.label, "SKIP"); assert.ok(c.cancelled && /Annulé — info de dernière heure : gardien blessé/.test(c.skip_reasons_fr[0]));
 });
 test("version : config.js = index.html (?v=) = sw.js par défaut", () => {
   const fs = require("fs"), p = require("path"), dir = p.join(__dirname, "..");

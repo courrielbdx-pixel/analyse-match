@@ -64,3 +64,5 @@ details.fiab summary{cursor:pointer}
 .filters{display:flex;flex-wrap:wrap;gap:.5rem 1rem;align-items:center}
 .filters .sw{display:inline-flex;align-items:center;gap:.35rem;font-size:.9rem;white-space:nowrap}
 .cnt.live{background:#e5383b;color:#fff;border-radius:9px;padding:0 .45em;font-weight:600}
+.badge.ko{background:#7a1d1d;color:#fff}
+.badge.tk.late{background:#b7791f;color:#fff}

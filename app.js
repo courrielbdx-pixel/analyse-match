@@ -106,7 +106,9 @@
   function badge(r, small) {
     if (!r) return `<span class="badge none">pas encore lu</span>`;
     const t = r.label === "TICKET";
-    return `<span class="badge ${t ? "tk" : "sk"}">${t ? "TICKET" : "SKIP"}${t && paperOn() ? ` <em>papier</em>` : ""}</span>` +
+    const head = r.cancelled ? `<span class="badge ko" title="${esc(r.cancel_reason_fr || "")}">⚠️ Annulé — info de dernière heure${small ? "" : " : " + esc(r.cancel_reason_fr || "")}</span>`
+      : `<span class="badge ${t ? "tk" : "sk"}${t && r.late_ticket ? " late" : ""}">${t ? (r.late_ticket ? "🆕 TICKET tardif" : "TICKET") : "SKIP"}${t && paperOn() ? ` <em>papier</em>` : ""}</span>`;
+    return head +
       (small ? ` <span class="sel">${esc(L.shortSel(r.pick.market, r.pick.selection))} ${L.pct(r.model_probability)}</span>` : "");
   }
   function star(f) {
@@ -360,9 +362,14 @@
       const rows = Object.keys(nm).map(k => { const x = cv[k] || {}; return `<tr><th>${nm[k]}</th><td>${x.n || 0}</td><td>${x.n ? L.signedPct(x.mean_clv) : "—"}</td><td>${x.n ? L.pct(x.beat_close) : "—"}</td></tr>`; }).join("");
       h += `<section class="card clvb"><h3>Cote de clôture (CLV)</h3><p class="muted">Compare la cote prise à la meilleure cote relevée 2 à 25 min avant le coup d'envoi. Un CLV positif régulier veut dire que le marché a bougé dans notre sens : c'est le signal le plus rapide d'un vrai avantage (environ 50 paris suffisent pour une tendance).</p><div class="hscroll"><table><tr><th></th><th>Paris</th><th>CLV moyen</th><th>Battu la clôture</th></tr>${rows}</table></div></section>`;
     }
+    const lt = r.data.late; if (lt) {
+      const c = lt.clv || {};
+      h += `<section class="card lateb"><h3>Tickets tardifs 🆕</h3><p class="muted">SKIP devenus TICKET à la lecture des compos officielles (au moins 30 min avant le coup d'envoi). Bilan séparé, hors bilan principal.</p><p>${lt.n} réglé(s) · ${lt.won || 0} gagné(s) · réussite ${lt.hit_rate == null ? "—" : L.pct(lt.hit_rate)} · ROI à 1 € ${lt.roi == null ? "—" : L.signedPct(lt.roi)} (${(lt.pl_units || 0) >= 0 ? "+" : ""}${L.nf(lt.pl_units || 0, 2)} €) · CLV ${c.n ? L.signedPct(c.mean_clv) : "—"}</p></section>`;
+    }
+    const cn = r.data.cancelled; if (cn && cn.length) h += `<section class="card"><h3>Tickets annulés ⚠️ (journal)</h3><p class="muted">Annulés à H-1 sur info de dernière heure ; hors bilan principal.</p><ul>${cn.map(x => `<li>${esc(x.date)} · ${esc(x.label_fr)} — ${esc(x.cancel_reason_fr || "")} · ${x.final_score ? esc(x.final_score) + " (" + (x.outcome === "won" ? "aurait gagné" : x.outcome === "lost" ? "aurait perdu" : esc(x.outcome)) + ")" : "à venir"}</li>`).join("")}</ul></section>`;
     const kl = r.data.kelly; if (kl) {
       const ln = (n, x) => x ? `<tr><th>${n}</th><td>${x.bets}</td><td>${x.zero_stake || 0}</td><td>${L.nf(x.bank, 2)} €</td><td>${L.signedPct(x.roi_bank)}</td></tr>` : "";
-      h += `<section class="card kelly"><h3>Bankroll simulée (Kelly 1/4)</h3><p class="muted">${esc((kl.tickets || {}).rule_fr || "")}. Mise = 1/4 de la mise « optimale » selon le modèle. Chaque ligne part de 100 € fictifs ; lignes figées avant le coup d\'envoi, cote obligatoire. Papier uniquement.</p><p class="muted">« Sans mise » : Kelly donne une mise nulle, car le modèle ne voit aucune valeur à cette cote (EV ≤ 0). Le pari est compté mais rien n\'est misé.</p><div class="hscroll"><table><tr><th></th><th>Paris misés</th><th>Sans mise</th><th>Bankroll</th><th>Évolution</th></tr>${ln("Tickets", kl.tickets)}${ln("SKIP · Probable (ligne 1)", kl.probable)}${ln("SKIP · Résultat (ligne 2)", kl.resultat)}${ln("SKIP · Valeur (ligne 3)", kl.valeur)}</table></div></section>`;
+      h += `<section class="card kelly"><h3>Bankroll simulée (Kelly 1/4)</h3><p class="muted">${esc((kl.tickets || {}).rule_fr || "")}. Mise = 1/4 de la mise « optimale » selon le modèle. Chaque ligne part de 100 € fictifs ; lignes figées avant le coup d\'envoi, cote obligatoire. Papier uniquement.</p><p class="muted">« Sans mise » : Kelly donne une mise nulle, car le modèle ne voit aucune valeur à cette cote (EV ≤ 0). Le pari est compté mais rien n\'est misé.</p><div class="hscroll"><table><tr><th></th><th>Paris misés</th><th>Sans mise</th><th>Bankroll</th><th>Évolution</th></tr>${ln("Tickets", kl.tickets)}${ln("Tickets tardifs", kl.tardifs)}${ln("SKIP · Probable (ligne 1)", kl.probable)}${ln("SKIP · Résultat (ligne 2)", kl.resultat)}${ln("SKIP · Valeur (ligne 3)", kl.valeur)}</table></div></section>`;
     }
     const fa = r.data.fun_aggregate; if (fa) h += `<section class="card fun"><h3>Combiné fun 🎲 (hors stats tickets)</h3><p>${fa.played} joué(s) · ${fa.won} gagné(s) sur ${fa.settled} réglé(s) · P/L papier à ${L.nf(fa.stake_eur, 2)} € : ${fa.pl_eur >= 0 ? "+" : ""}${L.nf(fa.pl_eur, 2)} €</p></section>`;
     const ca = r.data.combines_aggregate; if (ca) h += `<section class="card"><h3>Combiné du jour</h3><p>${ca.settled} réglé(s) sur ${ca.n} · réussite ${ca.hit_rate == null ? "—" : L.pct(ca.hit_rate)} · ROI papier ${ca.roi == null ? "—" : L.signedPct(ca.roi)} (${ca.pl_units >= 0 ? "+" : ""}${L.nf(ca.pl_units, 2)} u)</p></section>`;

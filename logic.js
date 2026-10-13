@@ -78,7 +78,11 @@
     const before = rs.filter(r => Date.parse(r.timestamp) < ko);
     const conf = before.filter(r => r.lineups_confirmed);
     const tk = before.filter(r => r.label === "TICKET"); // verrou : un TICKET publié reste officiel
-    const rule = tk.length && !(entry && entry.cancelled) ? tk[0] : conf.length ? conf[conf.length - 1] : (before.length ? before[before.length - 1] : null);
+    if (tk.length && entry && entry.cancelled) { // annulé H-1 : ticket d'origine affiché façon SKIP, jamais redevenu ticket
+      const why = entry.cancel_reason_fr || "info contradictoire";
+      return { reading: { ...tk[0], label: "SKIP", cancelled: true, cancel_reason_fr: why, skip_reasons_fr: [`⚠️ Annulé — info de dernière heure : ${why}`] }, anomaly: null, readings: rs };
+    }
+    const rule = tk.length ? tk[0] : conf.length ? conf[conf.length - 1] : (before.length ? before[before.length - 1] : null);
     const pub = entry && entry.final_reading_id ? rs.find(r => r.reading_id === entry.final_reading_id) : null;
     if (!entry || !entry.final_reading_id) return { reading: rule, anomaly: "final_reading_id absent : lecture finale déterminée par la règle", readings: rs };
     if (!pub) return { reading: rule, anomaly: `final_reading_id ${entry.final_reading_id} inexistant : règle appliquée`, readings: rs };
