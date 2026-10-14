@@ -128,7 +128,7 @@
           <span class="lgl"><span class="cc">${esc(f.league.country_code || "")}</span> ${leagueLabel(f)}${une ? ` <span class="une">À la une</span>` : ""}</span>
           <span class="tm">${logo(f.home)}<span class="nm">${esc(f.home.name)}</span></span>
           <span class="tm">${logo(f.away)}<span class="nm">${esc(f.away.name)}</span></span>
-          <span class="bd">${badge(r, true)}${r && r.lineups_confirmed ? ` <span class="compo">compo ✓</span>` : ""}${res}</span>${altLine(r, true)}${valLine(r, true, f._pick && f._pick.skip_check)}
+          <span class="bd">${badge(r, true)}${r && r.lineups_confirmed ? ` <span class="compo">compo</span>` : ""}${res}</span>${altLine(r, true)}${valLine(r, true, f._pick && f._pick.skip_check)}
         </span>
       </a>${star(f)}</li>`;
   }

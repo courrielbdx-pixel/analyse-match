@@ -1,5 +1,8 @@
 # Changelog — Analyse Match
 
+## v6.0.28 — 2026-10-14
+- Agenda : indicateur compos officielles affiché « compo » (vert) sans la coche ✓, pour ne pas la confondre avec un pick gagné. Les marques ✓/✗ de résultat restent inchangées. Affichage seulement.
+
 ## v6.0.0 — 2026-10-12
 - **Demande d'origine** : construction complète du site v6 à partir du cahier des charges `cahier_des_charges_analyse_match_v6.md` (Bruno, via Grok Bot).
 - **Ce qui a changé** : nouveau site statique (HTML/CSS/JS sans framework) : Agenda (Affiches 10/20/30, Heure, Nuit, Suivis), page match, Bilan, Règles et à propos, Diagnostic, cache hors ligne, mode exemple `?data=sample&now=…&variant=mismatch|v7|big`.
