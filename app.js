@@ -11,7 +11,7 @@
   const $app = document.getElementById("app");
   const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const REGIONS = [["toutes", "Toutes"], ["france", "France"], ["uefa", "UEFA"], ["europe", "Europe"], ["ameriques", "Amériques"], ["asie_oceanie", "Asie / Océanie"], ["monde", "Monde"]];
-  const TRIG = { matin: "Matin", soir: "Lecture du soir 22h", compo: "Compo", manuel: "Manuel" };
+  const TRIG = { matin: "Matin", soir: "Lecture du soir 22h", releco: "Relecture", compo: "Compo", manuel: "Manuel" };
   // ---------------- stockage ----------------
   const LS = {
     get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
@@ -142,7 +142,7 @@
     return out.join("");
   }
   const fmtDT = d => { const p = L.paris(d); const dl = L.dayLabel(p.date); return `${dl.day} ${dl.month} ${p.time}`; };
-  const RUNT = { matin: "matin", compo: "compo", live: "live", reglement: "règlement", calendrier: "calendrier", manuel: "manuel", soir: "soir" };
+  const RUNT = { matin: "matin", compo: "compo", live: "live", reglement: "règlement", calendrier: "calendrier", manuel: "manuel", soir: "soir", releco: "relecture 3 h" };
   function header() {
     const m = state.meta; let upd = "";
     if (m) { const g = new Date(m.generated_at); const ago = L.durationText(Math.max(0, now() - g)); upd = `Données mises à jour à ${L.paris(g).time} (${esc(RUNT[m.run && m.run.type] || m.run && m.run.type || "")}) · il y a ${ago}`; }
@@ -277,7 +277,7 @@
     const hasCompo = fr.readings.some(x => x.trigger === "compo");
     let h = `<section class="card rap"><h2>Rapport</h2><div class="rb">${badge(r)} <b>${esc(r.pick.label_fr)}</b></div>
       <p><span class="tip" title="Probabilité calculée par le modèle Dixon-Coles pour cette sélection. Ce n'est pas une garantie.">Probabilité du modèle : ${L.pct(r.model_probability)}</span></p>
-      <p class="muted">${esc(TRIG[r.trigger] || r.trigger)} · ${L.paris(r.timestamp).time} · Compos officielles : ${r.lineups_confirmed ? "oui" : "non"}</p>`;
+      <p class="muted">${esc(L.trigLabel(r, TRIG))} · ${L.paris(r.timestamp).time} · Compos officielles : ${r.lineups_confirmed ? "oui" : "non"}</p>`;
     if (!hasCompo && ko > 0 && ko < 90 * 60e3 && fr.readings.some(x => x.trigger === "matin")) h += `<p class="note">En attente des compos officielles (relecture automatique par Grok Bot)</p>`;
     h += altLine(r, false) + valLine(r, false, f._pick && f._pick.skip_check);
     const lat = r.label === "TICKET" ? L.laterReadings(fr) : [];
@@ -312,7 +312,7 @@
         : c ? `<div class="chg">${esc(c.text)}${c.title ? ` · ${esc(c.title)}` : ""} — <i>${esc(c.reason)}</i></div>` : "";
       if (!tr) prev = r;
       const head = tr ? esc(L.recheckText(tr)) : `${esc(sel)} · ${r.label} · ${L.pct(r.model_probability)}`;
-      return `<li${r === fin ? ' class="final"' : ""}>${esc(TRIG[r.trigger] || r.trigger)} · ${L.histWhen(r.timestamp, ref)} — ${head}${r === fin ? " — <i>Lecture finale</i>" : ""}${ch}</li>`;
+      return `<li${r === fin ? ' class="final"' : ""}>${esc(L.trigLabel(r, TRIG))} · ${L.histWhen(r.timestamp, ref)} — ${head}${r === fin ? " — <i>Lecture finale</i>" : ""}${ch}</li>`;
     }).join("");
     return `<section class="card"><h2>Suivi des lectures <span class="cnt">${rs.length} lecture${rs.length > 1 ? "s" : ""}</span></h2><ol class="hist">${li}</ol></section>`;
   }

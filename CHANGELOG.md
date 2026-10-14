@@ -1,5 +1,9 @@
 # Changelog — Analyse Match
 
+## v6.0.31 — 2026-10-14
+- Relecture toutes les 3 h (jour et nuit) des matchs non commencés débutant dans les 24 h : « Relecture HHh ». Relectures inchangées regroupées (« inchangée ×N »). Tickets toujours verrouillés.
+- Prochaine lecture affichée selon le rythme 3 h.
+
 ## v6.0.30 — 2026-10-14
 - Combiné fun : sélections classées par datetime de coup d'envoi (date+heure), pour que 18h45 aujourd'hui apparaisse avant 1h30 demain. Affichage seulement.
 

@@ -204,14 +204,17 @@
     return { active: active.sort(c), archived: archived.sort(c), purge };
   }
   function at(dateStr, hh) { return new Date(`${dateStr}T${String(hh).padStart(2, "0")}:00:00${offsetFor(dateStr)}`); }
-  // Prochaine lecture prévue : matin 07:00 (matchs de 07:00 à 07:00 le lendemain), soir 22:00 (matchs de la nuit jusqu'à 10:00)
+  // Prochaine lecture prévue : matin 07:00 + relecture toutes les 3 h (01, 04, 10, 13, 16, 19, 22 h, vers HH:13), matchs dans les 24 h
+  const RELECO_H = [1, 4, 7, 10, 13, 16, 19, 22];
   function nextReading(kickoff, now) {
-    const k = new Date(kickoff), n = now || new Date(), p = paris(k); const c = [];
-    c.push(at(p.hour >= 7 ? p.date : addDays(p.date, -1), 7));
-    if (p.hour < 10) c.push(at(addDays(p.date, -1), 22));
-    if (p.hour >= 22) c.push(at(p.date, 22));
-    const ok = c.filter(r => r >= n && k - r >= 10 * 60e3).sort((a, b) => a - b);
+    const k = new Date(kickoff), n = now || new Date(); const d0 = paris(n).date; const c = [];
+    for (const dd of [addDays(d0, -1), d0, addDays(d0, 1)]) for (const h of RELECO_H) c.push(new Date(at(dd, h).getTime() + (h === 7 ? 0 : 13 * 60e3)));
+    const ok = c.filter(r => r >= n && k - r >= 10 * 60e3 && k - r < 24 * 3600e3).sort((a, b) => a - b);
     return ok[0] || null;
+  }
+  function trigLabel(r, TRIG) {
+    if (r.trigger === "releco") return `Relecture ${paris(new Date(r.timestamp)).hour}h` + (r.releco_count > 1 ? ` (inchangée ×${r.releco_count})` : "");
+    return (TRIG && TRIG[r.trigger]) || r.trigger;
   }
   function offsetFor(dateStr) { // décalage Europe/Paris à midi ce jour-là
     const d = new Date(dateStr + "T12:00:00Z"); const p = paris(d); const diff = (p.hour - 12) * 60 + p.minute;
@@ -283,7 +286,7 @@
     const ms = now.getTime() - Date.parse(gen); if (ms <= 3 * 3600e3) return null; return durationText(ms);
   }
   function durationText(ms) { const m = Math.round(ms / 60000); if (m < 60) return `${m} min`; const h = Math.floor(m / 60), r = m % 60; return r ? `${h} h ${String(r).padStart(2, "0")}` : `${h} h`; }
-  const API = { paris, addDays, dateBar, dayLabel, pct, units, odds, signedPct, nf, shortSel, affiches, heure, nuit, regionFilter, finalReading, recheck, outcome, mergeLive, statusText, hm, nextReading, laterReadings, combineInfo, espnStatus, skipTag, histChange, histWhen, recheckText, valeurFamilies,
+  const API = { paris, addDays, dateBar, dayLabel, pct, units, odds, signedPct, nf, shortSel, affiches, heure, nuit, regionFilter, finalReading, recheck, outcome, mergeLive, statusText, hm, nextReading, trigLabel, laterReadings, combineInfo, espnStatus, skipTag, histChange, histWhen, recheckText, valeurFamilies,
     suivisSplit, exportSuivis, importSuivis, isoWeek, summarize, filterSettled, breakdown, calibration, cumulative, valueSentence, compareAggregates, paperCount, bucketOf,
     schemaOk, validFixture, staleText, durationText, offsetFor, FINISHED, LIVE, legStatus, legsSummary, sortLegsByKickoff };
   if (typeof module !== "undefined" && module.exports) module.exports = API; else root.AMLogic = API;

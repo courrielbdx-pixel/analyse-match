@@ -55,11 +55,13 @@ test("données anciennes", () => { assert.strictEqual(L.staleText(new Date("2026
 test("schema_version", () => { assert.ok(L.schemaOk({ schema_version: "6.0" })); assert.ok(!L.schemaOk({ schema_version: "7.0" })); });
 test("heure exacte 16h15", () => { assert.strictEqual(L.hm("2026-10-12T16:15:00+02:00"), "16h15"); assert.strictEqual(L.statusText({ status: { short: "NS" }, kickoff: "2026-10-12T09:05:00+02:00" }), "9h05"); });
 test("live : score + minute", () => { assert.strictEqual(L.statusText({ status: { short: "2H", elapsed: 50 }, score: { home: 1, away: 0 } }), "1-0 50'"); assert.strictEqual(L.statusText({ status: { short: "HT" }, score: { home: 0, away: 0 } }), "0-0 MT"); });
-test("prochaine lecture : nuit → 22:00 la veille, jour → 07:00", () => {
+test("prochaine lecture : relecture toutes les 3 h (HH:13) + 07:00", () => {
   const n = new Date("2026-10-12T19:00:00+02:00");
-  assert.strictEqual(L.nextReading("2026-10-13T01:10:00+02:00", n).toISOString(), new Date("2026-10-12T22:00:00+02:00").toISOString());
-  assert.strictEqual(L.nextReading("2026-10-13T20:45:00+02:00", n).toISOString(), new Date("2026-10-13T07:00:00+02:00").toISOString());
-  assert.strictEqual(L.nextReading("2026-10-12T21:00:00+02:00", n), null);
+  assert.strictEqual(L.nextReading("2026-10-13T01:10:00+02:00", n).toISOString(), new Date("2026-10-12T19:13:00+02:00").toISOString());
+  assert.strictEqual(L.nextReading("2026-10-13T20:45:00+02:00", n).toISOString(), new Date("2026-10-12T22:13:00+02:00").toISOString());
+  assert.strictEqual(L.nextReading("2026-10-12T19:20:00+02:00", n), null);
+  assert.strictEqual(L.nextReading("2026-10-13T10:05:00+02:00", new Date("2026-10-13T06:00:00+02:00")).toISOString(), new Date("2026-10-13T07:00:00+02:00").toISOString());
+  assert.strictEqual(L.trigLabel({ trigger: "releco", timestamp: "2026-10-13T16:13:00+02:00", releco_count: 3 }, {}), "Relecture 16h (inchangée ×3)");
 });
 test("verrou TICKET : une relecture SKIP ne remplace pas le ticket publié", () => {
   const rs = [{ reading_id: "a-r1", timestamp: "2026-10-12T16:48:00+02:00", label: "TICKET", lineups_confirmed: false, pick: {} },
