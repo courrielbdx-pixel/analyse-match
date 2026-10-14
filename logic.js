@@ -84,8 +84,8 @@
     const conf = before.filter(r => r.lineups_confirmed);
     const tk = before.filter(r => r.label === "TICKET"); // verrou : un TICKET publié reste officiel
     if (tk.length && entry && entry.cancelled) { // annulé H-1 : ticket d'origine affiché façon SKIP, jamais redevenu ticket
-      const why = entry.cancel_reason_fr || "info contradictoire";
-      return { reading: { ...tk[0], label: "SKIP", cancelled: true, cancel_reason_fr: why, skip_reasons_fr: [`⚠️ Annulé — info de dernière heure : ${why}`] }, anomaly: null, readings: rs };
+      const why = entry.cancel_reason_fr || "info contradictoire"; const lab = entry.cancel_label_fr || "Annulé — info de dernière heure";
+      return { reading: { ...tk[0], label: "SKIP", cancelled: true, cancel_reason_fr: why, cancel_label_fr: lab, skip_reasons_fr: [`⚠️ ${lab} : ${why}`] }, anomaly: null, readings: rs };
     }
     const rule = tk.length ? tk[0] : conf.length ? conf[conf.length - 1] : (before.length ? before[before.length - 1] : null);
     const pub = entry && entry.final_reading_id ? rs.find(r => r.reading_id === entry.final_reading_id) : null;
@@ -208,7 +208,7 @@
   const RELECO_H = [1, 4, 7, 10, 13, 16, 19, 22];
   function nextReading(kickoff, now) {
     const k = new Date(kickoff), n = now || new Date(); const d0 = paris(n).date; const c = [];
-    for (const dd of [addDays(d0, -1), d0, addDays(d0, 1)]) for (const h of RELECO_H) c.push(new Date(at(dd, h).getTime() + (h === 7 ? 0 : 13 * 60e3)));
+    for (const dd of [addDays(d0, -1), d0, addDays(d0, 1)]) for (const h of RELECO_H) c.push(at(dd, h));
     const ok = c.filter(r => r >= n && k - r >= 10 * 60e3 && k - r < 24 * 3600e3).sort((a, b) => a - b);
     return ok[0] || null;
   }
