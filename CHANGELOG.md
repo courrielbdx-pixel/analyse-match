@@ -1,6 +1,6 @@
 # Changelog — Analyse Match
 
-## v6.0.29 — 2026-10-14
+## v6.0.30 — 2026-10-14
 - Combiné fun : sélections classées par datetime de coup d'envoi (date+heure), pour que 18h45 aujourd'hui apparaisse avant 1h30 demain. Affichage seulement.
 
 ## v6.0.28 — 2026-10-14

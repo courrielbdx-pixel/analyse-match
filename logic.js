@@ -204,11 +204,11 @@
     return { active: active.sort(c), archived: archived.sort(c), purge };
   }
   function at(dateStr, hh) { return new Date(`${dateStr}T${String(hh).padStart(2, "0")}:00:00${offsetFor(dateStr)}`); }
-  // Prochaine lecture prévue : matin 07:00 (matchs de 07:00 à 07:00 le lendemain), soir 22:00 (matchs de la nuit jusqu'à 08:00)
+  // Prochaine lecture prévue : matin 07:00 (matchs de 07:00 à 07:00 le lendemain), soir 22:00 (matchs de la nuit jusqu'à 10:00)
   function nextReading(kickoff, now) {
     const k = new Date(kickoff), n = now || new Date(), p = paris(k); const c = [];
     c.push(at(p.hour >= 7 ? p.date : addDays(p.date, -1), 7));
-    if (p.hour < 8) c.push(at(addDays(p.date, -1), 22));
+    if (p.hour < 10) c.push(at(addDays(p.date, -1), 22));
     if (p.hour >= 22) c.push(at(p.date, 22));
     const ok = c.filter(r => r >= n && k - r >= 10 * 60e3).sort((a, b) => a - b);
     return ok[0] || null;

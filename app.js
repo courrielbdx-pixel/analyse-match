@@ -11,7 +11,7 @@
   const $app = document.getElementById("app");
   const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const REGIONS = [["toutes", "Toutes"], ["france", "France"], ["uefa", "UEFA"], ["europe", "Europe"], ["ameriques", "Amériques"], ["asie_oceanie", "Asie / Océanie"], ["monde", "Monde"]];
-  const TRIG = { matin: "Matin", soir: "Soir", compo: "Compo", manuel: "Manuel" };
+  const TRIG = { matin: "Matin", soir: "Lecture du soir 22h", compo: "Compo", manuel: "Manuel" };
   // ---------------- stockage ----------------
   const LS = {
     get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
