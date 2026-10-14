@@ -1,5 +1,8 @@
 # Changelog — Analyse Match
 
+## v6.0.33 — 2026-10-14
+- Compos officielles : ESPN (gratuit) devient la source principale, API-Football en repli seulement si ESPN n'a rien (économise le quota ; marche aussi sans le plan Pro pour les ligues couvertes). Source affichée : « compo ESPN » / « compo API ». Modèle inchangé.
+
 ## v6.0.32 — 2026-10-14
 - Relectures à heures fixes (1h, 4h, 7h, 10h, 13h, 16h, 19h, 22h) ; la lecture du matin de 7h compte comme relecture 7h.
 - Relecture dans les 2 sens : ticket annulé (⚠️ « Annulé (relecture HHh) », raison, hors bilan) si les règles dc-v1 échouent nettement ou info web/X contradictoire ; SKIP → 🆕 ticket si toutes les règles passent nettement (marge 1 pt EV / 1 pt écart). Un ticket annulé ne redevient jamais ticket.

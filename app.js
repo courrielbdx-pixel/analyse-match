@@ -128,7 +128,7 @@
           <span class="lgl"><span class="cc">${esc(f.league.country_code || "")}</span> ${leagueLabel(f)}${une ? ` <span class="une">À la une</span>` : ""}</span>
           <span class="tm">${logo(f.home)}<span class="nm">${esc(f.home.name)}</span></span>
           <span class="tm">${logo(f.away)}<span class="nm">${esc(f.away.name)}</span></span>
-          <span class="bd">${badge(r, true)}${r && r.lineups_confirmed ? ` <span class="compo">compo</span>` : ""}${res}</span>${altLine(r, true)}${valLine(r, true, f._pick && f._pick.skip_check)}
+          <span class="bd">${badge(r, true)}${r && r.lineups_confirmed ? ` <span class="compo">compo${r.lineups_source ? " " + (r.lineups_source === "espn" ? "ESPN" : "API") : ""}</span>` : ""}${res}</span>${altLine(r, true)}${valLine(r, true, f._pick && f._pick.skip_check)}
         </span>
       </a>${star(f)}</li>`;
   }
@@ -277,7 +277,7 @@
     const hasCompo = fr.readings.some(x => x.trigger === "compo");
     let h = `<section class="card rap"><h2>Rapport</h2><div class="rb">${badge(r)} <b>${esc(r.pick.label_fr)}</b></div>
       <p><span class="tip" title="Probabilité calculée par le modèle Dixon-Coles pour cette sélection. Ce n'est pas une garantie.">Probabilité du modèle : ${L.pct(r.model_probability)}</span></p>
-      <p class="muted">${esc(L.trigLabel(r, TRIG))} · ${L.paris(r.timestamp).time} · Compos officielles : ${r.lineups_confirmed ? "oui" : "non"}</p>`;
+      <p class="muted">${esc(L.trigLabel(r, TRIG))} · ${L.paris(r.timestamp).time} · Compos officielles : ${r.lineups_confirmed ? "oui" + (r.lineups_source ? ` (${r.lineups_source === "espn" ? "ESPN" : "API-Football"})` : "") : "non"}</p>`;
     if (!hasCompo && ko > 0 && ko < 90 * 60e3 && fr.readings.some(x => x.trigger === "matin")) h += `<p class="note">En attente des compos officielles (relecture automatique par Grok Bot)</p>`;
     h += altLine(r, false) + valLine(r, false, f._pick && f._pick.skip_check);
     const lat = r.label === "TICKET" ? L.laterReadings(fr) : [];
