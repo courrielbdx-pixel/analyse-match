@@ -254,11 +254,12 @@
   function funCard(fu) {
     if (fu && fu.none) return `<section class="card fun"><h3>Combiné fun 🎲</h3><p>Pas de combiné fun pour l'instant : ${fu.eligible} match(s) seulement passent les garde-fous (5 minimum : ≥ 20 matchs d'historique par équipe, modèle à ≤ 10 pts du marché).</p></section>`;
     if (!fu || !(fu.legs || []).length) return "";
+    const sorted = L.sortLegsByKickoff(fu.legs);
     const ci = L.combineInfo(fu); const fxm = {}; for (const f of [...fixturesOf(prefs.date), ...fixturesOf(L.addDays(prefs.date, 1))]) fxm[f.fixture_id] = f;
     const ICON = { won: "✅", lost: "❌", void: "↩️", live: "⏳", pending: "⏳" };
-    const sts = fu.legs.map(l => L.legStatus(l, fxm[l.fixture_id])); const sm = L.legsSummary(sts);
+    const sts = sorted.map(l => L.legStatus(l, fxm[l.fixture_id])); const sm = L.legsSummary(sts);
     const res = sm.status === "won" ? " · gagné ✅" : sm.status === "lost" ? " · perdu ❌" : "";
-    const legs = fu.legs.map((l, i) => { const f = fxm[l.fixture_id], st = f && f.status && f.status.short, sc = f && f.score && f.score.home != null && (L.LIVE.includes(st) || L.FINISHED.includes(st)) ? ` <span class="muted">(${esc(L.statusText(f))})</span>` : "";
+    const legs = sorted.map((l, i) => { const f = fxm[l.fixture_id], st = f && f.status && f.status.short, sc = f && f.score && f.score.home != null && (L.LIVE.includes(st) || L.FINISHED.includes(st)) ? ` <span class="muted">(${esc(L.statusText(f))})</span>` : "";
       return `<li class="leg-${sts[i]}"><span class="lst" aria-label="${{ won: "gagné", lost: "perdu", void: "annulé", live: "en cours", pending: "à venir" }[sts[i]]}">${ICON[sts[i]]}</span> ${L.hm(l.kickoff)} ${esc(l.home)} – ${esc(l.away)} : <b>${esc(L.shortSel(l.market, l.selection))}</b> · ${l.market_prob != null ? L.pct(l.market_prob) : L.pct(l.prob)} · ${L.odds(l.odds)}${sc}</li>`; }).join("");
     const sumLine = `<p class="funsum"><b>${sm.text}</b>${sm.status === "lost" ? " — combiné perdu" : sm.status === "won" ? " — combiné gagné 🎉" : ""}</p>`;
     const gain = (fu.stake_eur || 0.1) * ci.odds;

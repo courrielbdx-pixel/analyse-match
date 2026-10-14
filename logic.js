@@ -110,6 +110,10 @@
     const odds = c.legs.reduce((a, l) => a * l.odds, 1), p = c.legs.reduce((a, l) => a * l.prob, 1);
     return { none: false, legs: c.legs, odds, p, ev: p * odds - 1, outcome: c.outcome || null };
   }
+  // Affichage : classer les jambes par datetime de coup d'envoi (pas seulement HH:MM)
+  function sortLegsByKickoff(legs) {
+    return (legs || []).slice().sort((a, b) => Date.parse(a.kickoff) - Date.parse(b.kickoff) || (a.fixture_id - b.fixture_id));
+  }
   // ---- revérification cohérence (COH-01, 02, 03, 04, 07) ----
   function recheck(r, rules) {
     const fails = []; const P = r.probabilities || {}; const m = r.pick && r.pick.market, s = r.pick && r.pick.selection;
@@ -281,6 +285,6 @@
   function durationText(ms) { const m = Math.round(ms / 60000); if (m < 60) return `${m} min`; const h = Math.floor(m / 60), r = m % 60; return r ? `${h} h ${String(r).padStart(2, "0")}` : `${h} h`; }
   const API = { paris, addDays, dateBar, dayLabel, pct, units, odds, signedPct, nf, shortSel, affiches, heure, nuit, regionFilter, finalReading, recheck, outcome, mergeLive, statusText, hm, nextReading, laterReadings, combineInfo, espnStatus, skipTag, histChange, histWhen, recheckText, valeurFamilies,
     suivisSplit, exportSuivis, importSuivis, isoWeek, summarize, filterSettled, breakdown, calibration, cumulative, valueSentence, compareAggregates, paperCount, bucketOf,
-    schemaOk, validFixture, staleText, durationText, offsetFor, FINISHED, LIVE, legStatus, legsSummary };
+    schemaOk, validFixture, staleText, durationText, offsetFor, FINISHED, LIVE, legStatus, legsSummary, sortLegsByKickoff };
   if (typeof module !== "undefined" && module.exports) module.exports = API; else root.AMLogic = API;
 })(typeof self !== "undefined" ? self : this);

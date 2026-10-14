@@ -142,3 +142,16 @@ test("legStatus combiné fun : réglé, direct anticipé, en attente", () => {
   assert.strictEqual(s.text, "2 ✅ · 1 ❌ · 1 en cours"); assert.strictEqual(s.status, "lost");
   assert.strictEqual(L.legsSummary(["won", "void"]).status, "won");
 });
+
+test("combiné fun : jambes classées par datetime de coup d'envoi (pas HH:MM)", () => {
+  // 1h30 demain avant 18h45 aujourd'hui si on ne regarde que l'heure → faux
+  const legs = [
+    { fixture_id: 3, kickoff: "2026-10-15T01:30:00+02:00", home: "A", away: "B" },
+    { fixture_id: 1, kickoff: "2026-10-14T18:45:00+02:00", home: "C", away: "D" },
+    { fixture_id: 2, kickoff: "2026-10-14T20:00:00+02:00", home: "E", away: "F" },
+    { fixture_id: 4, kickoff: "2026-10-14T18:45:00+02:00", home: "G", away: "H" },
+  ];
+  const s = L.sortLegsByKickoff(legs);
+  assert.deepStrictEqual(s.map(l => l.fixture_id), [1, 4, 2, 3]);
+  assert.strictEqual(legs[0].fixture_id, 3); // entrée non mutée
+});
