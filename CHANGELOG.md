@@ -1,5 +1,9 @@
 # Changelog — Analyse Match
 
+## v6.0.34 — 2026-10-15
+- AFC Champions League Two retirée (non jouable chez Unibet) : plus couverte, plus affichée, et ses matchs sont sortis du Bilan tickets et du Bilan SKIP (liste d'exclusion réversible, historique conservé).
+- Ajout D1 Lettonie (Virsliga) et D1 Arabie saoudite (Saudi Pro League). Compos/scores : ESPN pour l'Arabie saoudite, API-Football pour la Lettonie (pas couverte par ESPN). Modèle inchangé.
+
 ## v6.0.33 — 2026-10-14
 - Compos officielles : ESPN (gratuit) devient la source principale, API-Football en repli seulement si ESPN n'a rien (économise le quota ; marche aussi sans le plan Pro pour les ligues couvertes). Source affichée : « compo ESPN » / « compo API ». Modèle inchangé.
 
