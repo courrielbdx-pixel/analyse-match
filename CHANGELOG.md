@@ -1,5 +1,9 @@
 # Changelog — Analyse Match
 
+## v6.0.36 — 2026-10-15
+- En-tête : jauge du quota API-Football du jour (% restant, utilisé/limite, plan et date de fin lus via /status à chaque publication, heure de mise à jour), vert/orange/rouge.
+- Bouton « 🔄 Tout relire » : copie une demande de relecture complète à coller à Grok Bot (aucun appel serveur).
+
 ## v6.0.35 — 2026-10-15
 - Affiches : plus de scores à égalité. L’`affiche_score` garde la base de tier (80/60/40/20) et un petit bonus d’historique, et y ajoute la force moyenne des deux équipes (att − déf Dixon-Coles du modèle déjà utilisé pour le pick ; coupes = modèle inter-compétitions), plafonnée pour qu’un tier inférieur ne dépasse jamais un tier supérieur. Affichage seulement — règles dc-v1 / TICKET / SKIP inchangées.
 

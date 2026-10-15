@@ -220,6 +220,12 @@
     const d = new Date(dateStr + "T12:00:00Z"); const p = paris(d); const diff = (p.hour - 12) * 60 + p.minute;
     const sgn = diff >= 0 ? "+" : "-", a = Math.abs(diff); return `${sgn}${String(Math.floor(a / 60)).padStart(2, "0")}:${String(a % 60).padStart(2, "0")}`;
   }
+  function apiGauge(u) {
+    if (!u || !u.limit) return null;
+    const left = Math.max(0, u.limit - u.used), pct = Math.round(100 * left / u.limit);
+    return { pct, left, limit: u.limit, level: pct >= 50 ? "ok" : pct >= 20 ? "mid" : "low", plan: u.plan || null, end: u.plan_expires ? paris(new Date(u.plan_expires)).date.slice(5).split("-").reverse().join("/") : null };
+  }
+  function relecAllText(d) { const p = paris(d); return `Relis tous les matchs à venir (relecture complète) — demandé le ${p.date.slice(5).split("-").reverse().join("/")} ${p.time.replace(":", "h")}`; }
   function exportSuivis(suivis) { return Object.entries(suivis || {}).map(([id, s]) => ({ fixture_id: +id, kickoff: s.kickoff, home: s.home, away: s.away, league: s.league, region: s.region })); }
   function importSuivis(suivis, list, now) {
     const out = Object.assign({}, suivis); let added = 0;
@@ -287,7 +293,7 @@
   }
   function durationText(ms) { const m = Math.round(ms / 60000); if (m < 60) return `${m} min`; const h = Math.floor(m / 60), r = m % 60; return r ? `${h} h ${String(r).padStart(2, "0")}` : `${h} h`; }
   const API = { paris, addDays, dateBar, dayLabel, pct, units, odds, signedPct, nf, shortSel, affiches, heure, nuit, regionFilter, finalReading, recheck, outcome, mergeLive, statusText, hm, nextReading, trigLabel, laterReadings, combineInfo, espnStatus, skipTag, histChange, histWhen, recheckText, valeurFamilies,
-    suivisSplit, exportSuivis, importSuivis, isoWeek, summarize, filterSettled, breakdown, calibration, cumulative, valueSentence, compareAggregates, paperCount, bucketOf,
+    suivisSplit, apiGauge, relecAllText, exportSuivis, importSuivis, isoWeek, summarize, filterSettled, breakdown, calibration, cumulative, valueSentence, compareAggregates, paperCount, bucketOf,
     schemaOk, validFixture, staleText, durationText, offsetFor, FINISHED, LIVE, legStatus, legsSummary, sortLegsByKickoff };
   if (typeof module !== "undefined" && module.exports) module.exports = API; else root.AMLogic = API;
 })(typeof self !== "undefined" ? self : this);

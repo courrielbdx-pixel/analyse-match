@@ -67,3 +67,14 @@ details.fiab summary{cursor:pointer}
 .badge.ko{background:#7a1d1d;color:#fff}
 .badge.tk.late{background:#b7791f;color:#fff}
 .fun .legs .lst{display:inline-block;width:1.4em}.fun .leg-lost{opacity:.75}.funsum{margin:.3em 0}
+
+.apiline{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:6px;font-size:.8rem}
+.apig{display:inline-flex;align-items:center;gap:6px;padding:3px 8px;border-radius:999px;background:rgba(127,127,127,.12)}
+.apig .bar{width:46px;height:6px;border-radius:3px;background:rgba(127,127,127,.25);overflow:hidden}
+.apig .bar i{display:block;height:100%}
+.apig.ok .bar i{background:#2e9e5b}.apig.mid .bar i{background:#e8930c}.apig.low .bar i{background:#d64545}
+.apig.low{color:#d64545}
+.relall{border:0;border-radius:999px;padding:5px 12px;font-weight:600;cursor:pointer;color:#fff;background:linear-gradient(135deg,#3b6fe0,#6a4be0);box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.relall:active{transform:scale(.97)}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);opacity:0;background:#222;color:#fff;padding:8px 14px;border-radius:8px;transition:.25s;z-index:99;pointer-events:none}
+#toast.show{opacity:1;transform:translateX(-50%)}

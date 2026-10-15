@@ -157,3 +157,9 @@ test("combiné fun : jambes classées par datetime de coup d'envoi (pas HH:MM)",
   assert.deepStrictEqual(s.map(l => l.fixture_id), [1, 4, 2, 3]);
   assert.strictEqual(legs[0].fixture_id, 3); // entrée non mutée
 });
+test("jauge API et texte Tout relire", () => {
+  const g = L.apiGauge({ used: 450, limit: 7500, plan: "Pro", plan_expires: "2026-11-16T17:01:00+01:00" });
+  assert.deepStrictEqual([g.pct, g.left, g.level, g.end], [94, 7050, "ok", "16/11"]);
+  assert.strictEqual(L.apiGauge({ used: 7000, limit: 7500 }).level, "low"); assert.strictEqual(L.apiGauge(null), null);
+  assert.strictEqual(L.relecAllText(new Date("2026-10-15T19:45:00Z")), "Relis tous les matchs à venir (relecture complète) — demandé le 15/10 21h45");
+});

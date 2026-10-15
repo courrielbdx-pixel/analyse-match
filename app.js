@@ -143,10 +143,18 @@
   }
   const fmtDT = d => { const p = L.paris(d); const dl = L.dayLabel(p.date); return `${dl.day} ${dl.month} ${p.time}`; };
   const RUNT = { matin: "matin", compo: "compo", live: "live", reglement: "règlement", calendrier: "calendrier", manuel: "manuel", soir: "soir", releco: "relecture 3 h" };
+  const nf = n => n.toLocaleString("fr-FR").replace(/\u202f|\u00a0/g, " ");
+  function apiLine(m) {
+    const g = L.apiGauge(m && m.api_usage); const btn = `<button class="relall" data-relall="1">🔄 Tout relire</button>`;
+    if (!g) return `<div class="apiline">${btn}</div>`;
+    const t = m.api_usage.updated_at || m.generated_at;
+    return `<div class="apiline"><span class="apig ${g.level}" title="Quota API-Football du jour"><span class="bar"><i style="width:${g.pct}%"></i></span>API : ${g.pct} % restant (${nf(g.left)} / ${nf(g.limit)} aujourd'hui)${g.end ? ` · ${esc(g.plan || "Plan")} jusqu'au ${g.end}` : ""} · mis à jour ${L.paris(new Date(t)).time.replace(":", "h")}</span>${btn}</div>`;
+  }
+  function toast(msg) { let el = document.getElementById("toast"); if (!el) { el = document.createElement("div"); el.id = "toast"; document.body.appendChild(el); } el.textContent = msg; el.className = "show"; clearTimeout(toast.t); toast.t = setTimeout(() => el.className = "", 2600); }
   function header() {
     const m = state.meta; let upd = "";
     if (m) { const g = new Date(m.generated_at); const ago = L.durationText(Math.max(0, now() - g)); upd = `Données mises à jour à ${L.paris(g).time} (${esc(RUNT[m.run && m.run.type] || m.run && m.run.type || "")}) · il y a ${ago}`; }
-    return `<header class="top"><h1>Analyse Match</h1><div class="sub">Bureau · v${esc(C.APP_VERSION)}</div><div class="upd">${upd}</div></header>${banners()}`;
+    return `<header class="top"><h1>Analyse Match</h1><div class="sub">Bureau · v${esc(C.APP_VERSION)}</div><div class="upd">${upd}</div>${apiLine(m)}</header>${banners()}`;
   }
   // ---------------- Agenda ----------------
   async function agenda() {
@@ -537,6 +545,7 @@
     if (t.dataset.n) { prefs.n = +t.dataset.n; savePrefs(); return route(); }
     if (t.dataset.sort) { prefs.sorts = prefs.sorts || {}; const cur = prefs.sorts[t.dataset.sort] || { k: "key", dir: 1 }; prefs.sorts[t.dataset.sort] = { k: t.dataset.k, dir: cur.k === t.dataset.k ? -cur.dir : 1 }; savePrefs(); const y = window.scrollY; await route(); window.scrollTo(0, y); return; }
     if (t.id === "back") { const prev = state.prevHash && !/^#\/match/.test(state.prevHash) ? state.prevHash : "#/agenda"; location.hash = prev; return; }
+    if (t.dataset.relall) { const txt = L.relecAllText(now()); try { await navigator.clipboard.writeText(txt); toast("Copié : colle-le à Grok Bot"); } catch (err) { toast("Copie impossible — " + txt); } return; }
     if (t.dataset.copy) { try { await navigator.clipboard.writeText(t.dataset.copy); t.textContent = "Copié ✓"; } catch (err) { t.textContent = "Copie impossible"; } return; }
     if (t.id === "exp") {
       const list = L.exportSuivis(suivis); const txt = JSON.stringify(list, null, 1);
