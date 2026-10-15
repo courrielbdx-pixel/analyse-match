@@ -1,5 +1,9 @@
 # Changelog — Analyse Match
 
+## v6.0.38 — 2026-10-15
+- Championnats alignés sur l’offre Unibet FR. Retirés (`EXCLUDED_LEAGUES`, réversible) : League One (41), League Two (42), AFC Champions League Elite (17), et leurs matchs retirés du bilan publié (`state/settled.json` intact).
+- Ajoutés : Afrique du Sud (288), Chypre (318), Israël (383), Irlande (357), Irlande du Nord (408), Paraguay Apertura/Clausura (250/252), Slovaquie (332), Ukraine (333), Bosnie (315), Azerbaïdjan (419), Biélorussie (116), Géorgie (327), Estonie (329), Islande (164), Algérie (186), Émirats arabes unis (301), Liga Portugal 2 (95), Coupe de Suisse (209). Historique 2023-2026 chargé ; compos/scores ESPN pour rsa.1, cyp.1, isr.1, irl.1, nir.1, par.1. Équipes promues (< 20 matchs) en SKIP.
+
 ## v6.0.37 — 2026-10-15
 - Bilan publié à partir du 13/10 (`BILAN_START`, réversible) : les matchs du 12/10 (ancienne logique de choix, surtout +/−2,5 et BTTS) sont retirés des tickets, du Bilan SKIP, de Kelly, du CLV et des combinés. `state/settled.json` intact. Note affichée sur la page Bilan.
 
