@@ -1,5 +1,8 @@
 # Changelog — Analyse Match
 
+## v6.0.37 — 2026-10-15
+- Bilan publié à partir du 13/10 (`BILAN_START`, réversible) : les matchs du 12/10 (ancienne logique de choix, surtout +/−2,5 et BTTS) sont retirés des tickets, du Bilan SKIP, de Kelly, du CLV et des combinés. `state/settled.json` intact. Note affichée sur la page Bilan.
+
 ## v6.0.36 — 2026-10-15
 - En-tête : jauge du quota API-Football du jour (% restant, utilisé/limite, plan et date de fin lus via /status à chaque publication, heure de mise à jour), vert/orange/rouge.
 - Bouton « 🔄 Tout relire » : copie une demande de relecture complète à coller à Grok Bot (aucun appel serveur).

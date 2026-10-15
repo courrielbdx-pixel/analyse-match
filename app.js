@@ -364,7 +364,7 @@
     const sel = `<div class="bsel"><label>Méthode <select id="method">${hist.map(x => `<option value="${esc(x.version)}"${x.version === mv ? " selected" : ""}>${esc(x.version)} (depuis le ${fmtFr(x.from)}${x.to ? " au " + fmtFr(x.to) : ""})</option>`).join("")}</select></label>
       <label>Période <select id="period">${[["7", "7 jours"], ["30", "30 jours"], ["debut", "Depuis le début de la méthode"], ["perso", "Plage personnalisée"]].map(([k, n]) => `<option value="${k}"${k === per ? " selected" : ""}>${n}</option>`).join("")}</select></label>
       ${per === "perso" ? `<label>Du <input type="date" id="pfrom" value="${esc(prefs.pfrom || mh.from)}"></label><label>Au <input type="date" id="pto" value="${esc(prefs.pto || today)}"></label>` : ""}</div>`;
-    let h = `<h2 class="pt">Bilan</h2>${sel}`;
+    let h = `<h2 class="pt">Bilan</h2>${r.data.bilan_start === "2026-10-13" ? `<p class="note bstart">Bilan à partir du 13/10 (le 12/10 suivait une ancienne logique de choix).</p>` : ""}${sel}`;
     if (paperN < th.paper_min_tickets) h += `<div class="banner paper">Mode papier — échantillon insuffisant : ${paperN} / ${th.paper_min_tickets} tickets réglés. Ne pas considérer ces résultats comme une preuve.<div class="prog" role="progressbar" aria-valuemin="0" aria-valuemax="${th.paper_min_tickets}" aria-valuenow="${paperN}"><i data-w="${Math.min(100, paperN / th.paper_min_tickets * 100)}"></i></div></div>`;
     const sl = r.data.skip_lines; if (sl) {
       const nm = { probable: "Probable (ligne 1)", resultat: "Résultat (ligne 2)", valeur: "Valeur (ligne 3)" };
