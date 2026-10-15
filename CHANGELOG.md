@@ -1,5 +1,8 @@
 # Changelog — Analyse Match
 
+## v6.0.35 — 2026-10-15
+- Affiches : plus de scores à égalité. L’`affiche_score` garde la base de tier (80/60/40/20) et un petit bonus d’historique, et y ajoute la force moyenne des deux équipes (att − déf Dixon-Coles du modèle déjà utilisé pour le pick ; coupes = modèle inter-compétitions), plafonnée pour qu’un tier inférieur ne dépasse jamais un tier supérieur. Affichage seulement — règles dc-v1 / TICKET / SKIP inchangées.
+
 ## v6.0.34 — 2026-10-15
 - AFC Champions League Two retirée (non jouable chez Unibet) : plus couverte, plus affichée, et ses matchs sont sortis du Bilan tickets et du Bilan SKIP (liste d'exclusion réversible, historique conservé).
 - Ajout D1 Lettonie (Virsliga) et D1 Arabie saoudite (Saudi Pro League). Compos/scores : ESPN pour l'Arabie saoudite, API-Football pour la Lettonie (pas couverte par ESPN). Modèle inchangé.
