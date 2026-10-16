@@ -321,8 +321,8 @@
       const c = tr ? null : L.histChange(prev, r);
       const ch = tr ? `<div class="chg">Affichage SKIP (info) : ${esc(sel)} · ${r.label} · ${L.pct(r.model_probability)}</div>`
         : c ? `<div class="chg">${esc(c.text)}${c.title ? ` · ${esc(c.title)}` : ""} — <i>${esc(c.reason)}</i></div>` : "";
-      if (!tr) prev = r;
       const isC = cc && r.reading_id === cc.cancel_reading_id; const isF = r.reading_id === fid;
+      if (!tr || isC) prev = r;
       const head = isC ? `<b class="ko">❌ ${esc(L.cancelBanner(cc))}</b>` : tr ? esc(L.recheckText(tr)) : `${esc(sel)} · ${r.label} · ${L.pct(r.model_probability)}`;
       const ch2 = isC ? `<div class="chg">Lecture actuelle : SKIP — pari le plus probable ${esc(sel)} ${L.pct(r.model_probability)}</div>` : ch;
       return `<li${isF ? ' class="final"' : ""}${isC ? ' class="cancel"' : ""}>${esc(L.trigLabel(r, TRIG))} · ${L.histWhen(r.timestamp, ref)} — ${head}${isF ? " — <i>Lecture finale</i>" : ""}${ch2}</li>`;
