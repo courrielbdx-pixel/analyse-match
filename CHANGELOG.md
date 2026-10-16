@@ -1,5 +1,9 @@
 # Changelog — Analyse Match
 
+## v6.0.40 — 2026-10-16
+- Ticket annulé plus lisible (affichage seulement, règles dc-v1 inchangées) : bandeau « Ticket … annulé à la relecture Xh — la cote est passée de A à B (EV … < 5 %), le modèle n'a pas changé / a changé », puis « Lecture actuelle : SKIP — pari le plus probable … ». Le rapport (puces, heure, probabilités) vient désormais de la dernière lecture, plus de l'ancienne lecture du ticket. Carte : « ⚠️ Ticket −2,5 annulé · SKIP 1N 78 % ». Suivi : la lecture d'annulation est marquée ❌ en clair.
+- Alerte H-1 (`alert_check.py`) : une annulation en relecture n'était plus signalée si une alerte H-1 « confirmé » avait déjà été envoyée pour ce match (cas Radnik Surdulica–Radnički Niš, confirmé 15h48, annulé 16h10). Seule une annulation déjà notifiée la masque désormais. Test `tests/test_alert_cancel.py`.
+
 ## v6.0.39 — 2026-10-16
 - Correctif de continuité des SKIP (affichage seulement, règles de ticket dc-v1 inchangées) : quand le flux de cotes perd un marché entre deux lectures (ex. Estudiantes–Flamengo à 01:06, seul OU1.5 Pinnacle restant), la ligne « probable » ne bascule plus sur un autre pari faute de cote. La proba marché de la lecture précédente est reprise pour ce marché, et le pick précédent est conservé sauf si le modèle donne ≥ 2 pts de plus à un autre choix.
 - Lignes « résultat » (alt) et « valeur » reprises de la lecture précédente (marquées `stale_odds`, proba modèle à jour) au lieu de disparaître quand leur cote manque.

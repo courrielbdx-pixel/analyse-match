@@ -70,7 +70,15 @@ test("verrou TICKET : une relecture SKIP ne remplace pas le ticket publié", () 
   assert.strictEqual(fr.reading.reading_id, "a-r1");
   assert.strictEqual(L.laterReadings(fr)[0].reading_id, "a-r2");
   const c = L.finalReading({ readings: rs, cancelled: true, cancel_reason_fr: "gardien blessé" }, "2026-10-12T20:45:00+02:00").reading;
-  assert.strictEqual(c.reading_id, "a-r1"); assert.strictEqual(c.label, "SKIP"); assert.ok(c.cancelled && /Annulé — info de dernière heure : gardien blessé/.test(c.skip_reasons_fr[0]));
+  assert.strictEqual(c.reading_id, "a-r2"); assert.strictEqual(c.ticket_reading.reading_id, "a-r1"); assert.strictEqual(c.label, "SKIP"); assert.ok(c.cancelled && /Annulé — info de dernière heure : gardien blessé/.test(c.skip_reasons_fr[0]));
+});
+test("annulation relecture : bandeau clair, lecture actuelle = dernière lecture (v6.0.40)", () => {
+  const rs = [{ reading_id: "b-r1", timestamp: "2026-10-15T19:04:00+02:00", label: "TICKET", model_probability: 0.568, ev: 0.057, odds_seen: { value: 1.86 }, pick: { market: "OU2.5", selection: "under", label_fr: "Moins de 2,5 buts" }, reasoning_fr: ["Tous les critères dc-v1 sont remplis (EV +5,7 %)."] },
+    { reading_id: "b-r8", timestamp: "2026-10-16T16:10:00+02:00", label: "SKIP", model_probability: 0.78, pick: { market: "DC", selection: "1X", label_fr: "Radnik ou nul (1N)" }, reasoning_fr: ["Modèle 78,0 %"], skip_reasons_fr: ["Écart"],
+      ticket_recheck: { market: "OU2.5", selection: "under", model_probability: 0.568, odds: 1.79, ev: 0.017, still_ok: false, reasons_fr: ["EV +1,7 % < 5 %"] } }];
+  const c = L.finalReading({ readings: rs, cancelled: true, cancel_reason_fr: "EV +1,7 % < 5 %", cancel_label_fr: "Annulé (relecture 16h)" }, "2026-10-16T17:00:00+02:00").reading;
+  assert.strictEqual(c.reading_id, "b-r8"); assert.strictEqual(c.pick.selection, "1X"); assert.ok(!c.reasoning_fr.join(" ").includes("Tous les critères"));
+  assert.strictEqual(L.cancelBanner(c.cancel), "Ticket Moins de 2,5 buts annulé à la relecture 16h — la cote est passée de 1,86 à 1,79 (EV +1,7 % < 5 %), le modèle n'a pas changé (56,8 %)");
 });
 test("version : config.js = index.html (?v=) = sw.js par défaut", () => {
   const fs = require("fs"), p = require("path"), dir = p.join(__dirname, "..");

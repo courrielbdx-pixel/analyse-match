@@ -50,6 +50,17 @@
     return { text: "Vérification X en attente", cls: "wait" };
   }
   // ---- relecture d'un match à TICKET publié : pick du ticket réévalué ----
+  // ---- bandeau d'annulation lisible (v6.0.40) ----
+  function cancelBanner(c) {
+    if (!c) return "";
+    const h = c.at ? paris(c.at).hour + "h" : null;
+    let t = `Ticket ${c.ticket_pick_fr || ""} annulé${h ? ` à la relecture ${h}` : ""}`;
+    if (c.odds_to != null && c.odds_from != null && c.odds_changed) t += ` — la cote est passée de ${odds(c.odds_from)} à ${odds(c.odds_to)}`;
+    if (c.ev_to != null) t += ` (EV ${signedPct(c.ev_to)} < 5 %)`; else if (c.reason_fr) t += ` — ${c.reason_fr}`;
+    if (c.model_changed === false) t += `, le modèle n'a pas changé (${pct(c.p_to)})`;
+    else if (c.model_changed === true) t += `, le modèle a changé (${pct(c.p_from)} → ${pct(c.p_to)})`;
+    return t;
+  }
   function recheckText(t, time) {
     const crit = t.still_ok ? "critères toujours OK" : `critères plus OK : ${(t.reasons_fr || []).join(", ")}`;
     return `Relecture (info)${time ? " " + time : ""} : ${shortSel(t.market, t.selection)} ${pct(t.model_probability)} · cote ${t.odds != null ? odds(t.odds) : "—"}${t.ev != null ? " · EV " + signedPct(t.ev) : ""} · ${crit}`;
@@ -83,9 +94,19 @@
     const before = rs.filter(r => Date.parse(r.timestamp) < ko);
     const conf = before.filter(r => r.lineups_confirmed);
     const tk = before.filter(r => r.label === "TICKET"); // verrou : un TICKET publié reste officiel
-    if (tk.length && entry && entry.cancelled) { // annulé H-1 : ticket d'origine affiché façon SKIP, jamais redevenu ticket
+    if (tk.length && entry && entry.cancelled) { // annulé : ticket d'origine gardé (historique/bilan), affichage = DERNIÈRE lecture (v6.0.40)
       const why = entry.cancel_reason_fr || "info contradictoire"; const lab = entry.cancel_label_fr || "Annulé — info de dernière heure";
-      return { reading: { ...tk[0], label: "SKIP", cancelled: true, cancel_reason_fr: why, cancel_label_fr: lab, skip_reasons_fr: [`⚠️ ${lab} : ${why}`] }, anomaly: null, readings: rs };
+      const t0 = tk[0]; const last = before[before.length - 1] || t0;
+      const cr = before.find(r => Date.parse(r.timestamp) > Date.parse(t0.timestamp) && r.ticket_recheck && r.ticket_recheck.still_ok === false) || null;
+      const tr = cr && cr.ticket_recheck; const o0 = t0.odds_seen && t0.odds_seen.value;
+      const cancel = { label_fr: lab, reason_fr: why, ticket_pick_fr: t0.pick && t0.pick.label_fr, ticket_market: t0.pick && t0.pick.market, ticket_selection: t0.pick && t0.pick.selection,
+        ticket_reading_id: t0.reading_id, cancel_reading_id: cr ? cr.reading_id : null, at: cr ? cr.timestamp : null,
+        p_from: t0.model_probability, p_to: tr ? tr.model_probability : null, odds_from: o0 != null ? o0 : null, odds_to: tr ? tr.odds : null, ev_from: t0.ev, ev_to: tr ? tr.ev : null };
+      cancel.model_changed = tr && cancel.p_from != null && tr.model_probability != null ? Math.abs(tr.model_probability - cancel.p_from) >= 0.005 : null;
+      cancel.odds_changed = tr && cancel.odds_from != null && tr.odds != null ? Math.abs(tr.odds - cancel.odds_from) >= 0.005 : null;
+      const base = last === t0 ? { ...t0, skip_reasons_fr: [] } : last;
+      return { reading: { ...base, label: "SKIP", cancelled: true, cancel_reason_fr: why, cancel_label_fr: lab, cancel, ticket_reading: t0,
+        skip_reasons_fr: [`⚠️ ${lab} : ${why}`, ...((base.skip_reasons_fr) || [])] }, anomaly: null, readings: rs };
     }
     const rule = tk.length ? tk[0] : conf.length ? conf[conf.length - 1] : (before.length ? before[before.length - 1] : null);
     const pub = entry && entry.final_reading_id ? rs.find(r => r.reading_id === entry.final_reading_id) : null;
@@ -292,7 +313,7 @@
     const ms = now.getTime() - Date.parse(gen); if (ms <= 3 * 3600e3) return null; return durationText(ms);
   }
   function durationText(ms) { const m = Math.round(ms / 60000); if (m < 60) return `${m} min`; const h = Math.floor(m / 60), r = m % 60; return r ? `${h} h ${String(r).padStart(2, "0")}` : `${h} h`; }
-  const API = { paris, addDays, dateBar, dayLabel, pct, units, odds, signedPct, nf, shortSel, affiches, heure, nuit, regionFilter, finalReading, recheck, outcome, mergeLive, statusText, hm, nextReading, trigLabel, laterReadings, combineInfo, espnStatus, skipTag, histChange, histWhen, recheckText, valeurFamilies,
+  const API = { paris, addDays, dateBar, dayLabel, pct, units, odds, signedPct, nf, shortSel, affiches, heure, nuit, regionFilter, finalReading, recheck, outcome, mergeLive, statusText, hm, nextReading, trigLabel, laterReadings, combineInfo, espnStatus, skipTag, histChange, histWhen, recheckText, cancelBanner, valeurFamilies,
     suivisSplit, apiGauge, relecAllText, exportSuivis, importSuivis, isoWeek, summarize, filterSettled, breakdown, calibration, cumulative, valueSentence, compareAggregates, paperCount, bucketOf,
     schemaOk, validFixture, staleText, durationText, offsetFor, FINISHED, LIVE, legStatus, legsSummary, sortLegsByKickoff };
   if (typeof module !== "undefined" && module.exports) module.exports = API; else root.AMLogic = API;

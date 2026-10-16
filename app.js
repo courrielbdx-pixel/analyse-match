@@ -106,7 +106,8 @@
   function badge(r, small) {
     if (!r) return `<span class="badge none">pas encore lu</span>`;
     const t = r.label === "TICKET";
-    const head = r.cancelled ? `<span class="badge ko" title="${esc(r.cancel_reason_fr || "")}">⚠️ ${esc(r.cancel_label_fr || "Annulé — info de dernière heure")}${small ? "" : " : " + esc(r.cancel_reason_fr || "")}</span>`
+    const cpk = r.cancelled && r.cancel && r.cancel.ticket_market ? L.shortSel(r.cancel.ticket_market, r.cancel.ticket_selection) : "";
+    const head = r.cancelled ? (small ? `<span class="badge ko" title="${esc(L.cancelBanner(r.cancel) || r.cancel_reason_fr || "")}">⚠️ Ticket${cpk ? " " + esc(cpk) : ""} annulé</span> <span class="badge sk">SKIP</span>` : `<span class="badge sk">SKIP</span>`)
       : `<span class="badge ${t ? "tk" : "sk"}${t && r.late_ticket ? " late" : ""}">${t ? (r.late_ticket ? (r.releco_ticket ? `🆕 TICKET (relecture ${L.paris(new Date(r.timestamp)).hour}h)` : "🆕 TICKET tardif") : "TICKET") : "SKIP"}${t && paperOn() ? ` <em>papier</em>` : ""}</span>`;
     return head +
       (small ? ` <span class="sel">${esc(L.shortSel(r.pick.market, r.pick.selection))} ${L.pct(r.model_probability)}</span>` : "");
@@ -283,7 +284,8 @@
     const fin = L.FINISHED.includes(f.status.short);
     const ko = Date.parse(f.kickoff) - now();
     const hasCompo = fr.readings.some(x => x.trigger === "compo");
-    let h = `<section class="card rap"><h2>Rapport</h2><div class="rb">${badge(r)} <b>${esc(r.pick.label_fr)}</b></div>
+    const cb = r.cancelled ? `<div class="cancelban" role="status">⚠️ ${esc(L.cancelBanner(r.cancel) || `${r.cancel_label_fr} : ${r.cancel_reason_fr}`)}</div>` : "";
+    let h = `<section class="card rap"><h2>Rapport</h2>${cb}<div class="rb">${r.cancelled ? `Lecture actuelle : ${badge(r)} — pari le plus probable <b>${esc(r.pick.label_fr)}</b> ${L.pct(r.model_probability)}` : `${badge(r)} <b>${esc(r.pick.label_fr)}</b>`}</div>
       <p><span class="tip" title="Probabilité calculée par le modèle Dixon-Coles pour cette sélection. Ce n'est pas une garantie.">Probabilité du modèle : ${L.pct(r.model_probability)}</span></p>
       <p class="muted">${esc(L.trigLabel(r, TRIG))} · ${L.paris(r.timestamp).time} · Compos officielles : ${r.lineups_confirmed ? "oui" + (r.lineups_source ? ` (${r.lineups_source === "espn" ? "ESPN" : "API-Football"})` : "") : "non"}</p>`;
     if (!hasCompo && ko > 0 && ko < 90 * 60e3 && fr.readings.some(x => x.trigger === "matin")) h += `<p class="note">En attente des compos officielles (relecture automatique par Grok Bot)</p>`;
@@ -312,15 +314,18 @@
   function history(rs, fin, ref) {
     let prev = null;
     rs = rs.slice().sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp));
+    const fid = fin && fin.reading_id; const cc = fin && fin.cancelled && fin.cancel;
     const li = rs.map(r => {
       const sel = L.shortSel(r.pick.market, r.pick.selection);
-      const tr = r !== fin && r.ticket_recheck;
+      const tr = r.reading_id !== fid && r.ticket_recheck;
       const c = tr ? null : L.histChange(prev, r);
       const ch = tr ? `<div class="chg">Affichage SKIP (info) : ${esc(sel)} · ${r.label} · ${L.pct(r.model_probability)}</div>`
         : c ? `<div class="chg">${esc(c.text)}${c.title ? ` · ${esc(c.title)}` : ""} — <i>${esc(c.reason)}</i></div>` : "";
       if (!tr) prev = r;
-      const head = tr ? esc(L.recheckText(tr)) : `${esc(sel)} · ${r.label} · ${L.pct(r.model_probability)}`;
-      return `<li${r === fin ? ' class="final"' : ""}>${esc(L.trigLabel(r, TRIG))} · ${L.histWhen(r.timestamp, ref)} — ${head}${r === fin ? " — <i>Lecture finale</i>" : ""}${ch}</li>`;
+      const isC = cc && r.reading_id === cc.cancel_reading_id; const isF = r.reading_id === fid;
+      const head = isC ? `<b class="ko">❌ ${esc(L.cancelBanner(cc))}</b>` : tr ? esc(L.recheckText(tr)) : `${esc(sel)} · ${r.label} · ${L.pct(r.model_probability)}`;
+      const ch2 = isC ? `<div class="chg">Lecture actuelle : SKIP — pari le plus probable ${esc(sel)} ${L.pct(r.model_probability)}</div>` : ch;
+      return `<li${isF ? ' class="final"' : ""}${isC ? ' class="cancel"' : ""}>${esc(L.trigLabel(r, TRIG))} · ${L.histWhen(r.timestamp, ref)} — ${head}${isF ? " — <i>Lecture finale</i>" : ""}${ch2}</li>`;
     }).join("");
     return `<section class="card"><h2>Suivi des lectures <span class="cnt">${rs.length} lecture${rs.length > 1 ? "s" : ""}</span></h2><ol class="hist">${li}</ol></section>`;
   }
