@@ -1,5 +1,10 @@
 # Changelog — Analyse Match
 
+## v6.0.39 — 2026-10-16
+- Correctif de continuité des SKIP (affichage seulement, règles de ticket dc-v1 inchangées) : quand le flux de cotes perd un marché entre deux lectures (ex. Estudiantes–Flamengo à 01:06, seul OU1.5 Pinnacle restant), la ligne « probable » ne bascule plus sur un autre pari faute de cote. La proba marché de la lecture précédente est reprise pour ce marché, et le pick précédent est conservé sauf si le modèle donne ≥ 2 pts de plus à un autre choix.
+- Lignes « résultat » (alt) et « valeur » reprises de la lecture précédente (marquées `stale_odds`, proba modèle à jour) au lieu de disparaître quand leur cote manque.
+- Historique déjà réglé non modifié. Nouveau test `tests/test_skip_continuity.py`.
+
 ## v6.0.38 — 2026-10-15
 - Championnats alignés sur l’offre Unibet FR. Retirés (`EXCLUDED_LEAGUES`, réversible) : League One (41), League Two (42), AFC Champions League Elite (17), et leurs matchs retirés du bilan publié (`state/settled.json` intact).
 - Ajoutés : Afrique du Sud (288), Chypre (318), Israël (383), Irlande (357), Irlande du Nord (408), Paraguay Apertura/Clausura (250/252), Slovaquie (332), Ukraine (333), Bosnie (315), Azerbaïdjan (419), Biélorussie (116), Géorgie (327), Estonie (329), Islande (164), Algérie (186), Émirats arabes unis (301), Liga Portugal 2 (95), Coupe de Suisse (209). Historique 2023-2026 chargé ; compos/scores ESPN pour rsa.1, cyp.1, isr.1, irl.1, nir.1, par.1. Équipes promues (< 20 matchs) en SKIP.
