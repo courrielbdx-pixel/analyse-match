@@ -110,7 +110,7 @@
     const cpk = r.cancelled && r.cancel && r.cancel.ticket_market ? L.shortSel(r.cancel.ticket_market, r.cancel.ticket_selection) : "";
     const head = r.cancelled ? (small ? `<span class="badge ko" title="${esc(L.cancelBanner(r.cancel) || r.cancel_reason_fr || "")}">⚠️ Ticket${cpk ? " " + esc(cpk) : ""} annulé</span> <span class="badge sk">SKIP</span>` : `<span class="badge sk">SKIP</span>`)
       : `<span class="badge ${t ? "tk" : "sk"}${t && r.late_ticket ? " late" : ""}">${t ? (r.late_ticket ? (r.releco_ticket ? `🆕 TICKET (relecture ${L.paris(new Date(r.timestamp)).hour}h)` : "🆕 TICKET tardif") : "TICKET") : "SKIP"}${t && paperOn() ? ` <em>papier</em>` : ""}</span>`;
-    const hi = HI(r); if (hi) return head + ` <span class="sel histo">${esc(hi.text_fr)}</span>`;
+    const hi = HI(r); if (hi) return head + (small ? ` <span class="sel histo">${esc(hi.text_fr)}</span>` : "");
     return head +
       (small ? ` <span class="sel">${esc(L.shortSel(r.pick.market, r.pick.selection))} ${L.pct(r.model_probability)}</span>` : "");
   }
@@ -312,7 +312,6 @@
     let h = `<section class="card rap"><h2>Rapport</h2><div class="histoban" role="status">${esc(hi.text_fr)}</div><div class="rb">${badge(r)} <b>Aucun pari affiché</b></div>
       <p class="muted">Il faut au moins ${hi.min} matchs d'historique par équipe (même règle que les tickets) : ${esc(f.home.name)} ${hi.home}, ${esc(f.away.name)} ${hi.away}. Le modèle n'est pas fiable ici, aucune ligne n'est proposée et le match est hors Bilan SKIP.</p>
       <p class="muted">${esc(L.trigLabel(r, TRIG))} · ${L.paris(r.timestamp).time} · Compos officielles : ${r.lineups_confirmed ? "oui" : "non"}</p>`;
-    const oth = (r.skip_reasons_fr || []).filter(x => x !== hi.text_fr); if (oth.length) h += `<ul class="reasons">${oth.map(x => `<li>${esc(x)}</li>`).join("")}</ul>`;
     if (r.web_check && (r.web_check.items_fr || []).length) h += `<div class="web"><h3>Vérification web</h3><ul>${r.web_check.items_fr.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>`;
     if (fin) h += `<p class="final">Score final ${f.score.home}-${f.score.away} · pas de pick (historique insuffisant)</p>`;
     h += probaBlock(r, true);
