@@ -400,8 +400,10 @@
     }
     const cv = r.data.clv; if (cv) {
       const nm = { tickets: "Tickets", probable: "SKIP · Probable", resultat: "SKIP · Résultat", valeur: "SKIP · Valeur" };
-      const rows = Object.keys(nm).map(k => { const x = cv[k] || {}; return `<tr><th>${nm[k]}</th><td>${x.n || 0}</td><td>${x.n ? L.signedPct(x.mean_clv) : "—"}</td><td>${x.n ? L.pct(x.beat_close) : "—"}</td></tr>`; }).join("");
-      h += `<section class="card clvb"><h3>Cote de clôture (CLV)</h3><p class="muted">Compare la cote prise à la meilleure cote relevée 2 à 25 min avant le coup d'envoi. Un CLV positif régulier veut dire que le marché a bougé dans notre sens : c'est le signal le plus rapide d'un vrai avantage (environ 50 paris suffisent pour une tendance).</p><div class="hscroll"><table><tr><th></th><th>Paris</th><th>CLV moyen</th><th>Battu la clôture</th></tr>${rows}</table></div></section>`;
+      const rows = Object.keys(nm).map(k => { const x = cv[k] || {}; return `<tr><th>${nm[k]}</th><td>${x.n || 0}</td><td>${x.n ? L.signedPct(x.mean_clv) : "—"}</td><td>${x.n ? (x.beat_n != null ? `${x.beat_n}/${x.n} (${L.pct(x.beat_close)})` : L.pct(x.beat_close)) : "—"}</td></tr>`; }).join("");
+      const tl = (cv.tickets_list || []).slice().reverse(); const tlr = tl.map(x => `<tr><td>${esc(x.date || "")}</td><td>${esc(x.label_fr || "")}${x.label === "TARDIF" ? " 🆕" : ""}<br><span class="muted">${esc(typeof x.league === "object" && x.league ? (x.league.name || "") : (x.league || ""))}</span></td><td>${x.odds ? L.nf(x.odds, 2) : "—"}</td><td>${x.closing_odds ? L.nf(x.closing_odds, 2) : "en attente"}</td><td>${x.clv != null ? L.signedPct(x.clv) : "—"}</td></tr>`).join("");
+      const tlh = tl.length ? `<h4>Tickets : cote prise / cote de clôture</h4><div class="hscroll"><table><tr><th>Date</th><th>Pari</th><th>Cote prise</th><th>Clôture</th><th>CLV</th></tr>${tlr}</table></div>` : "";
+      h += `<section class="card clvb"><h3>Cote de clôture (CLV)</h3><p class="muted">Compare la cote prise à la meilleure cote relevée 2 à 25 min avant le coup d'envoi. Un CLV positif régulier veut dire que le marché a bougé dans notre sens : c'est le signal le plus rapide d'un vrai avantage (environ 50 paris suffisent pour une tendance).</p><div class="hscroll"><table><tr><th></th><th>Paris</th><th>CLV moyen</th><th>Battu la clôture</th></tr>${rows}</table></div>${tlh}</section>`;
     }
     const lt = r.data.late; if (lt) {
       const c = lt.clv || {};

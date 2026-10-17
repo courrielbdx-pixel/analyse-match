@@ -1,5 +1,10 @@
 # Changelog — Analyse Match
 
+## v6.0.42 — 2026-10-17
+- CLV des tickets plus visible (info, n'influence aucun ticket) : le Bilan affiche « battu la clôture » en nombre (x / n) et un tableau ticket par ticket (tickets + tardifs depuis le 13/10) : cote prise, cote de clôture (meilleure cote relevée 2 à 25 min avant le coup d'envoi), CLV. Lignes SKIP : CLV moyen inchangé.
+- Relecture 3 h sélective (économie API-Football) : un match n'est relu que s'il a pu changer : 1re lecture, ticket actif, coup d'envoi dans moins de 3 h 30, lecture de plus de 12 h ou d'un autre jour, nouvelle note web/X, compos, quasi-ticket (EV ≥ 2 %, proba ≥ 52 %, cote ≤ 3,60) ou cote manquante. Les autres gardent leur lecture. Bascules ticket ↔ SKIP inchangées pour les matchs relus. « Tout relire » : `run_cycle.py --mode releco --full` (ou `RELECO_GAP_MIN = 0`) relit tout. Test `tests/test_releco_selective.py`.
+- Backtest préparé (non activé) de la ligne SKIP « Résultat » : `research/backtest_resultat_2026-10-17.md`.
+
 ## v6.0.41 — 2026-10-17
 - SKIP à historique insuffisant (même seuil que les tickets dc-v1 : `CRIT["min_team_matches"]` = 20, lu dans `team_samples`) : si une équipe a moins de 20 matchs, la lecture affiche « ⚠️ Historique insuffisant (X / Y matchs) » sur la carte et dans le rapport, aucune ligne (probable, résultat, valeur) n'est affichée, et aucune proba n'est présentée comme pick (tableau des probabilités indicatif, sans surbrillance). Drapeau `history_insufficient` ajouté aux lectures publiées seulement (`engine.histo_mark`), `state/readings.json` intact.
 - Bilan SKIP : ces matchs sont retirés des lignes Probable / Résultat / Valeur et des SKIP du bilan publié, y compris rétroactivement depuis le 13/10 (`publish.histo_filter`, `state/settled.json` et `state/skip_lines.json` intacts) : 37 matchs exclus. Tickets, tardifs et annulés inchangés.
