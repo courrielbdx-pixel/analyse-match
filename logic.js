@@ -87,6 +87,14 @@
     return { text: parts.join(" · "), title, reason: rule ? "Changement d'affichage (règle SKIP du 13/10)" : (lc ? "Nouvelle lecture" : "Nouvelle sélection en tête"), rule };
   }
   function histWhen(ts, refDate) { const p = paris(ts); return p.date !== refDate ? `${p.date.slice(8, 10)}/${p.date.slice(5, 7)} ${p.time}` : p.time; }
+  // ---- v6.0.41 : SKIP à historique insuffisant (< 20 matchs pour une équipe, même seuil que les tickets) ----
+  function histo(r, rules) {
+    if (!r || r.label !== "SKIP" || r.cancelled) return null;
+    if (r.history_insufficient) return r.history_insufficient;
+    const ts = r.team_samples; const c = rules && rules.ticket_criteria; const mn = c && c.min_team_matches != null ? c.min_team_matches : 20;
+    if (!ts || ts.home == null || ts.away == null || Math.min(ts.home, ts.away) >= mn) return null;
+    return { home: ts.home, away: ts.away, min: mn, label_fr: "Historique insuffisant", text_fr: `⚠️ Historique insuffisant (${ts.home} / ${ts.away} matchs)` };
+  }
   // ---- lecture finale ----
   function finalReading(entry, kickoff) {
     const rs = (entry && entry.readings || []).slice().sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp));
@@ -313,7 +321,7 @@
     const ms = now.getTime() - Date.parse(gen); if (ms <= 3 * 3600e3) return null; return durationText(ms);
   }
   function durationText(ms) { const m = Math.round(ms / 60000); if (m < 60) return `${m} min`; const h = Math.floor(m / 60), r = m % 60; return r ? `${h} h ${String(r).padStart(2, "0")}` : `${h} h`; }
-  const API = { paris, addDays, dateBar, dayLabel, pct, units, odds, signedPct, nf, shortSel, affiches, heure, nuit, regionFilter, finalReading, recheck, outcome, mergeLive, statusText, hm, nextReading, trigLabel, laterReadings, combineInfo, espnStatus, skipTag, histChange, histWhen, recheckText, cancelBanner, valeurFamilies,
+  const API = { histo, paris, addDays, dateBar, dayLabel, pct, units, odds, signedPct, nf, shortSel, affiches, heure, nuit, regionFilter, finalReading, recheck, outcome, mergeLive, statusText, hm, nextReading, trigLabel, laterReadings, combineInfo, espnStatus, skipTag, histChange, histWhen, recheckText, cancelBanner, valeurFamilies,
     suivisSplit, apiGauge, relecAllText, exportSuivis, importSuivis, isoWeek, summarize, filterSettled, breakdown, calibration, cumulative, valueSentence, compareAggregates, paperCount, bucketOf,
     schemaOk, validFixture, staleText, durationText, offsetFor, FINISHED, LIVE, legStatus, legsSummary, sortLegsByKickoff };
   if (typeof module !== "undefined" && module.exports) module.exports = API; else root.AMLogic = API;

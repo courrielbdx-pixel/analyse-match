@@ -103,12 +103,14 @@
   }
   function allowedImg(u) { try { const x = new URL(u, location.href); return x.host === location.host || (C.ALLOWED_IMAGE_HOSTS || []).includes(x.host); } catch (e) { return false; } }
   const paperOn = () => { const m = state.meta; const b = state.bilan; if (!m) return true; const th = m.thresholds && m.thresholds.paper_min_tickets || 300; return b ? L.paperCount(b.settled, m.method.version) < th : true; };
+  const HI = r => L.histo(r, state.meta && state.meta.rules);
   function badge(r, small) {
     if (!r) return `<span class="badge none">pas encore lu</span>`;
     const t = r.label === "TICKET";
     const cpk = r.cancelled && r.cancel && r.cancel.ticket_market ? L.shortSel(r.cancel.ticket_market, r.cancel.ticket_selection) : "";
     const head = r.cancelled ? (small ? `<span class="badge ko" title="${esc(L.cancelBanner(r.cancel) || r.cancel_reason_fr || "")}">⚠️ Ticket${cpk ? " " + esc(cpk) : ""} annulé</span> <span class="badge sk">SKIP</span>` : `<span class="badge sk">SKIP</span>`)
       : `<span class="badge ${t ? "tk" : "sk"}${t && r.late_ticket ? " late" : ""}">${t ? (r.late_ticket ? (r.releco_ticket ? `🆕 TICKET (relecture ${L.paris(new Date(r.timestamp)).hour}h)` : "🆕 TICKET tardif") : "TICKET") : "SKIP"}${t && paperOn() ? ` <em>papier</em>` : ""}</span>`;
+    const hi = HI(r); if (hi) return head + ` <span class="sel histo">${esc(hi.text_fr)}</span>`;
     return head +
       (small ? ` <span class="sel">${esc(L.shortSel(r.pick.market, r.pick.selection))} ${L.pct(r.model_probability)}</span>` : "");
   }
@@ -121,7 +123,7 @@
     const fr = finalOf(f); const r = fr && fr.reading;
     const fin = L.FINISHED.includes(f.status.short), live = L.LIVE.includes(f.status.short);
     let res = "";
-    if (fin && r) { const o = L.outcome(r.pick.market, r.pick.selection, f.score.home, f.score.away, f.score.ht); res = o === "won" ? `<span class="res ok" aria-label="pick gagné">✓</span>` : o === "lost" ? `<span class="res ko" aria-label="pick perdu">✗</span>` : ""; }
+    if (fin && r && !HI(r)) { const o = L.outcome(r.pick.market, r.pick.selection, f.score.home, f.score.away, f.score.ht); res = o === "won" ? `<span class="res ok" aria-label="pick gagné">✓</span>` : o === "lost" ? `<span class="res ko" aria-label="pick perdu">✗</span>` : ""; }
     return `<li class="row" data-open="${f.fixture_id}" data-date="${f._date}">
       <a class="rowlink" href="#/match/${f.fixture_id}?d=${f._date}">
         <span class="time${live ? " live" : ""}${fin ? " fin" : ""}">${live && f.score && f.score.home != null ? `<span class="sc">${f.score.home}-${f.score.away}</span><span class="mn">${f.status.short === "HT" ? "MT" : f.status.elapsed != null ? f.status.elapsed + "'" : ""}</span>` : esc(L.statusText(f))}${(live || fin || f.status.short === "HT") ? `<span class="ko">${L.hm(f.kickoff)}</span>` : ""}</span>
@@ -241,13 +243,13 @@
     $app.innerHTML = header() + h; window.scrollTo(0, 0);
   }
   function altLine(r, short) {
-    const x = r && r.label === "SKIP" && r.alt_pick; if (!x) return "";
+    const x = r && r.label === "SKIP" && !HI(r) && r.alt_pick; if (!x) return "";
     const o = x.odds ? ` · cote ${L.odds(x.odds)}` : "";
     return short ? `<span class="alt">Résultat : ${esc(L.shortSel(x.market, x.selection))} ${L.pct(x.model_probability)}${o}</span>`
                  : `<p class="alt">Côté résultat / BTTS : <b>${esc(x.label_fr)}</b> · ${L.pct(x.model_probability)} (marché ${L.pct(x.market_probability)})${x.odds ? ` · cote ${L.odds(x.odds)} (${esc(x.bookmaker)})` : ""}</p>`;
   }
   function valLine(r, short, sc) {
-    const x = r && r.label === "SKIP" && r.value_pick; if (!x) return "";
+    const x = r && r.label === "SKIP" && !HI(r) && r.value_pick; if (!x) return "";
     const t = `${L.pct(x.model_probability)} · cote ${L.odds(x.odds)} · EV ${L.signedPct(x.ev)}`;
     const tg = L.skipTag(sc); const tag = tg ? ` <span class="xtag ${tg.cls}">${esc(tg.text)}</span>` : "";
     return short ? `<span class="alt val">Valeur (info) : ${esc(L.shortSel(x.market, x.selection))} ${t}${tag}</span>`
@@ -285,6 +287,8 @@
     const ko = Date.parse(f.kickoff) - now();
     const hasCompo = fr.readings.some(x => x.trigger === "compo");
     const cb = r.cancelled ? `<div class="cancelban" role="status">⚠️ ${esc(L.cancelBanner(r.cancel) || `${r.cancel_label_fr} : ${r.cancel_reason_fr}`)}</div>` : "";
+    const hi = HI(r);
+    if (hi) return rapportHisto(f, r, fr, hi, chk, fin, hasCompo);
     let h = `<section class="card rap"><h2>Rapport</h2>${cb}<div class="rb">${r.cancelled ? `Lecture actuelle : ${badge(r)} — pari le plus probable <b>${esc(r.pick.label_fr)}</b> ${L.pct(r.model_probability)}` : `${badge(r)} <b>${esc(r.pick.label_fr)}</b>`}</div>
       <p><span class="tip" title="Probabilité calculée par le modèle Dixon-Coles pour cette sélection. Ce n'est pas une garantie.">Probabilité du modèle : ${L.pct(r.model_probability)}</span></p>
       <p class="muted">${esc(L.trigLabel(r, TRIG))} · ${L.paris(r.timestamp).time} · Compos officielles : ${r.lineups_confirmed ? "oui" + (r.lineups_source ? ` (${r.lineups_source === "espn" ? "ESPN" : "API-Football"})` : "") : "non"}</p>`;
@@ -304,12 +308,23 @@
     if (!hasCompo && !fin) h += copyBtn(f);
     return h + `</section>`;
   }
-  function probaBlock(r) {
+  function rapportHisto(f, r, fr, hi, chk, fin, hasCompo) {
+    let h = `<section class="card rap"><h2>Rapport</h2><div class="histoban" role="status">${esc(hi.text_fr)}</div><div class="rb">${badge(r)} <b>Aucun pari affiché</b></div>
+      <p class="muted">Il faut au moins ${hi.min} matchs d'historique par équipe (même règle que les tickets) : ${esc(f.home.name)} ${hi.home}, ${esc(f.away.name)} ${hi.away}. Le modèle n'est pas fiable ici, aucune ligne n'est proposée et le match est hors Bilan SKIP.</p>
+      <p class="muted">${esc(L.trigLabel(r, TRIG))} · ${L.paris(r.timestamp).time} · Compos officielles : ${r.lineups_confirmed ? "oui" : "non"}</p>`;
+    const oth = (r.skip_reasons_fr || []).filter(x => x !== hi.text_fr); if (oth.length) h += `<ul class="reasons">${oth.map(x => `<li>${esc(x)}</li>`).join("")}</ul>`;
+    if (r.web_check && (r.web_check.items_fr || []).length) h += `<div class="web"><h3>Vérification web</h3><ul>${r.web_check.items_fr.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>`;
+    if (fin) h += `<p class="final">Score final ${f.score.home}-${f.score.away} · pas de pick (historique insuffisant)</p>`;
+    h += probaBlock(r, true);
+    if (!hasCompo && !fin) h += copyBtn(f);
+    return h + `</section>`;
+  }
+  function probaBlock(r, noPick) {
     const P = r.probabilities || {}; const lab = { "1X2": "1X2", "DC": "Double chance", "OU1.5": "± 1,5 buts", "OU2.5": "± 2,5 buts", "OU3.5": "± 3,5 buts", "BTTS": "Les deux marquent", "1X_O1.5": "1N & +1,5", "1X_BTTS": "1N & BTTS", "BTTS_O2.5": "BTTS & +2,5" };
-    const rows = Object.keys(P).map(m => `<tr><th>${esc(lab[m] || m)}</th>${Object.entries(P[m]).map(([s, v]) => `<td class="${m === r.pick.market && s === r.pick.selection ? "hl" : ""}">${esc(L.shortSel(m, s))} ${L.pct(v)}</td>`).join("")}</tr>`).join("");
+    const rows = Object.keys(P).map(m => `<tr><th>${esc(lab[m] || m)}</th>${Object.entries(P[m]).map(([s, v]) => `<td class="${!noPick && m === r.pick.market && s === r.pick.selection ? "hl" : ""}">${esc(L.shortSel(m, s))} ${L.pct(v)}</td>`).join("")}</tr>`).join("");
     const xg = r.expected_goals ? `<p>Buts attendus : ${L.nf(r.expected_goals.home, 2)} – ${L.nf(r.expected_goals.away, 2)}</p>` : "";
     const ts = (r.top_scores || []).length ? `<p>Scores les plus probables (indicatif) : ${r.top_scores.map(x => `${esc(x.score)} (${L.pct(x.p)})`).join(", ")}</p>` : "";
-    return `<details class="probs"><summary>Probabilités du modèle</summary><div class="hscroll"><table>${rows}</table></div>${xg}${ts}</details>`;
+    return `<details class="probs"><summary>Probabilités du modèle${noPick ? " (indicatives, peu fiables : historique insuffisant)" : ""}</summary><div class="hscroll"><table>${rows}</table></div>${xg}${ts}</details>`;
   }
   function history(rs, fin, ref) {
     let prev = null;
@@ -323,8 +338,9 @@
         : c ? `<div class="chg">${esc(c.text)}${c.title ? ` · ${esc(c.title)}` : ""} — <i>${esc(c.reason)}</i></div>` : "";
       const isC = cc && r.reading_id === cc.cancel_reading_id; const isF = r.reading_id === fid;
       if (!tr || isC) prev = r;
-      const head = isC ? `<b class="ko">❌ ${esc(L.cancelBanner(cc))}</b>` : tr ? esc(L.recheckText(tr)) : `${esc(sel)} · ${r.label} · ${L.pct(r.model_probability)}`;
-      const ch2 = isC ? `<div class="chg">Lecture actuelle : SKIP — pari le plus probable ${esc(sel)} ${L.pct(r.model_probability)}</div>` : ch;
+      const hr = !tr && !isC && HI(r);
+      const head = isC ? `<b class="ko">❌ ${esc(L.cancelBanner(cc))}</b>` : tr ? esc(L.recheckText(tr)) : hr ? `${r.label} · ${esc(hr.text_fr)}` : `${esc(sel)} · ${r.label} · ${L.pct(r.model_probability)}`;
+      const ch2 = isC ? `<div class="chg">Lecture actuelle : SKIP — pari le plus probable ${esc(sel)} ${L.pct(r.model_probability)}</div>` : (hr ? "" : ch);
       return `<li${isF ? ' class="final"' : ""}${isC ? ' class="cancel"' : ""}>${esc(L.trigLabel(r, TRIG))} · ${L.histWhen(r.timestamp, ref)} — ${head}${isF ? " — <i>Lecture finale</i>" : ""}${ch2}</li>`;
     }).join("");
     return `<section class="card"><h2>Suivi des lectures <span class="cnt">${rs.length} lecture${rs.length > 1 ? "s" : ""}</span></h2><ol class="hist">${li}</ol></section>`;

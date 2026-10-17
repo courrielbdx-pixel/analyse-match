@@ -1,5 +1,11 @@
 # Changelog — Analyse Match
 
+## v6.0.41 — 2026-10-17
+- SKIP à historique insuffisant (même seuil que les tickets dc-v1 : `CRIT["min_team_matches"]` = 20, lu dans `team_samples`) : si une équipe a moins de 20 matchs, la lecture affiche « ⚠️ Historique insuffisant (X / Y matchs) » sur la carte et dans le rapport, aucune ligne (probable, résultat, valeur) n'est affichée, et aucune proba n'est présentée comme pick (tableau des probabilités indicatif, sans surbrillance). Drapeau `history_insufficient` ajouté aux lectures publiées seulement (`engine.histo_mark`), `state/readings.json` intact.
+- Bilan SKIP : ces matchs sont retirés des lignes Probable / Résultat / Valeur et des SKIP du bilan publié, y compris rétroactivement depuis le 13/10 (`publish.histo_filter`, `state/settled.json` et `state/skip_lines.json` intacts) : 37 matchs exclus. Tickets, tardifs et annulés inchangés.
+- Vérification X des quasi-tickets : plus de quasi-ticket « historique 15–19 matchs » (aucune ligne n'est affichée sur ces matchs).
+- Continuité SKIP (6.0.39) et bandeau de ticket annulé (6.0.40) inchangés. Test `tests/test_histo.py` + tests JS.
+
 ## v6.0.40 — 2026-10-16
 - Ticket annulé plus lisible (affichage seulement, règles dc-v1 inchangées) : bandeau « Ticket … annulé à la relecture Xh — la cote est passée de A à B (EV … < 5 %), le modèle n'a pas changé / a changé », puis « Lecture actuelle : SKIP — pari le plus probable … ». Le rapport (puces, heure, probabilités) vient désormais de la dernière lecture, plus de l'ancienne lecture du ticket. Carte : « ⚠️ Ticket −2,5 annulé · SKIP 1N 78 % ». Suivi : la lecture d'annulation est marquée ❌ en clair.
 - Alerte H-1 (`alert_check.py`) : une annulation en relecture n'était plus signalée si une alerte H-1 « confirmé » avait déjà été envoyée pour ce match (cas Radnik Surdulica–Radnički Niš, confirmé 15h48, annulé 16h10). Seule une annulation déjà notifiée la masque désormais. Test `tests/test_alert_cancel.py`.

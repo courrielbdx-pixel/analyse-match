@@ -171,3 +171,14 @@ test("jauge API et texte Tout relire", () => {
   assert.strictEqual(L.apiGauge({ used: 7000, limit: 7500 }).level, "low"); assert.strictEqual(L.apiGauge(null), null);
   assert.strictEqual(L.relecAllText(new Date("2026-10-15T19:45:00Z")), "Relis tous les matchs à venir (relecture complète) — demandé le 15/10 21h45");
 });
+test("v6.0.41 historique insuffisant : seuil tickets, SKIP seulement", () => {
+  const rules = { ticket_criteria: { min_team_matches: 20 } };
+  const r = { label: "SKIP", team_samples: { home: 4, away: 33 } };
+  assert.deepStrictEqual(L.histo(r, rules).text_fr, "⚠️ Historique insuffisant (4 / 33 matchs)");
+  assert.strictEqual(L.histo({ ...r, team_samples: { home: 20, away: 20 } }, rules), null);
+  assert.strictEqual(L.histo({ ...r, label: "TICKET" }, rules), null);
+  assert.strictEqual(L.histo({ ...r, cancelled: true }, rules), null);
+  const flag = { home: 1, away: 2, min: 20, text_fr: "x" };
+  assert.strictEqual(L.histo({ label: "SKIP", history_insufficient: flag }, rules), flag);
+  assert.strictEqual(L.histo({ label: "SKIP" }, rules), null);
+});
