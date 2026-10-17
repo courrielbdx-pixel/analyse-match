@@ -298,6 +298,7 @@
     if (lat.length) { const x = lat[lat.length - 1]; h += x.ticket_recheck ? `<p class="muted relect">${esc(L.recheckText(x.ticket_recheck, L.paris(x.timestamp).time))} — ticket verrouillé (inchangé).</p><p class="muted">Affichage SKIP (info) : ${esc(x.pick.label_fr)} ${L.pct(x.model_probability)}</p>`
       : `<p class="muted relect">Relecture (info) ${L.paris(x.timestamp).time} : ${x.label} ${esc(x.pick.label_fr)} (${L.pct(x.model_probability)}) — le ticket officiel reste ${esc(r.pick.label_fr)}.</p>`; }
     if (r.label === "SKIP" && (r.skip_reasons_fr || []).length) h += `<ul class="reasons">${r.skip_reasons_fr.map(x => `<li>${esc(x)}</li>`).join("")}</ul>`;
+    if (r.history_cross) h += `<p class="xdiv">ℹ️ ${esc(r.history_cross.text_fr || "Historique complété avec la division précédente (promu/relégué)")}</p>`;
     if ((r.reasoning_fr || []).length) h += `<ul class="reasoning">${r.reasoning_fr.slice(0, 3).map(x => `<li>${esc(x)}</li>`).join("")}</ul>`;
     if (r.web_check && (r.web_check.items_fr || []).length) h += `<div class="web"><h3>Vérification web</h3><ul>${r.web_check.items_fr.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>`;
     if (r.odds_seen) h += `<p class="odds">cote vue ${L.odds(r.odds_seen.value)} (${esc(r.odds_seen.bookmaker)}) — information${r.ev != null ? ` · EV ${L.signedPct(r.ev)}` : ""}</p>`;

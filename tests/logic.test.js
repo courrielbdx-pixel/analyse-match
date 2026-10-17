@@ -182,3 +182,9 @@ test("v6.0.41 historique insuffisant : seuil tickets, SKIP seulement", () => {
   assert.strictEqual(L.histo({ label: "SKIP", history_insufficient: flag }, rules), flag);
   assert.strictEqual(L.histo({ label: "SKIP" }, rules), null);
 });
+test("v6.0.44 historique inter-divisions : SKIP débloqué, plus de bandeau", () => {
+  const rules = { ticket_criteria: { min_team_matches: 20 } };
+  const r = { label: "SKIP", team_samples: { home: 6, away: 38 }, history_cross: { text_fr: "Historique complété avec la division précédente (relégué)" } };
+  assert.strictEqual(L.histo(r, rules), null);
+  assert.ok(L.histo({ ...r, history_cross: undefined }, rules));
+});

@@ -82,3 +82,5 @@ details.fiab summary{cursor:pointer}
 .cancelban{background:#3a1717;border:1px solid #c0392b;color:#ffd7d2;border-radius:8px;padding:8px 10px;margin:6px 0 10px;font-weight:600}
 .hist li.cancel{border-left:3px solid #c0392b;padding-left:6px}
 .histoban{background:#3a3117;border:1px solid #c9a227;color:#ffeeb8;border-radius:8px;padding:8px 10px;margin:6px 0 10px;font-weight:600}.sel.histo{color:#e8c25a}
+
+.xdiv{color:#9fb3c8;font-size:.85em;margin:4px 0}

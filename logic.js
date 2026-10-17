@@ -90,6 +90,7 @@
   // ---- v6.0.41 : SKIP à historique insuffisant (< 20 matchs pour une équipe, même seuil que les tickets) ----
   function histo(r, rules) {
     if (!r || r.label !== "SKIP" || r.cancelled) return null;
+    if (r.history_cross) return null; // v6.0.44 : historique complété avec la division précédente (promu/relégué)
     if (r.history_insufficient) return r.history_insufficient;
     const ts = r.team_samples; const c = rules && rules.ticket_criteria; const mn = c && c.min_team_matches != null ? c.min_team_matches : 20;
     if (!ts || ts.home == null || ts.away == null || Math.min(ts.home, ts.away) >= mn) return null;
