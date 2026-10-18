@@ -259,8 +259,8 @@
     const ci = L.combineInfo(c); const note = `<p class="muted cbn">Construit uniquement avec les TICKETs validés : la marge du bookmaker se multiplie à chaque sélection, un combiné de picks faibles perd donc plus vite.</p>`;
     if (ci.none) return `<section class="card combi"><h3>Combiné du jour</h3><p>${ci.text}.</p>${note}</section>`;
     const res = ci.outcome === "won" ? " · gagné ✓" : ci.outcome === "lost" ? " · perdu ✗" : "";
-    const legs = ci.legs.map(l => `<li><a href="#/match/${l.fixture_id}?d=${esc(prefs.date || "")}">${L.hm(l.kickoff)} ${esc(l.home)} – ${esc(l.away)}</a><br><b>${esc(l.label_fr)}</b> · ${L.pct(l.prob)} · cote ${L.odds(l.odds)} (${esc(l.bookmaker)})${l.outcome === "won" ? " ✓" : l.outcome === "lost" ? " ✗" : ""}</li>`).join("");
-    return `<section class="card combi"><h3>Combiné du jour 🔒${res}</h3><ul class="legs">${legs}</ul><p>Proba modèle combinée : <b>${L.pct(ci.p)}</b> · Cote totale : <b>${L.odds(ci.odds)}</b> · EV ${L.signedPct(ci.ev)}</p>${note}</section>`;
+    const legs = ci.legs.map(l => `<li><a href="#/match/${l.fixture_id}?d=${esc(prefs.date || "")}">${L.hm(l.kickoff)} ${esc(l.home)} – ${esc(l.away)}</a><br><b>${esc(l.label_fr)}</b> · ${L.pct(l.prob)} · cote ${L.odds(l.odds)} (${esc(l.bookmaker)})${l.cancelled ? ` · <span class="sel histo">⚠️ ticket annulé, compté à cote 1</span>` : l.outcome === "won" ? " ✓" : l.outcome === "lost" ? " ✗" : ""}</li>`).join("");
+    return `<section class="card combi"><h3>Combiné du jour 🔒${res}</h3><ul class="legs">${legs}</ul><p>Proba modèle combinée : <b>${L.pct(ci.p)}</b> · Cote totale : <b>${L.odds(ci.odds)}</b> · EV ${L.signedPct(ci.ev)}${ci.cancelled ? ` <span class="muted">(sans la jambe annulée)</span>` : ""}</p>${note}</section>`;
   }
   function funCard(fu) {
     if (fu && fu.none) return `<section class="card fun"><h3>Combiné fun 🎲</h3><p>Pas de combiné fun pour l'instant : ${fu.eligible} match(s) seulement passent les garde-fous (5 minimum : ≥ 20 matchs d'historique par équipe, modèle à ≤ 10 pts du marché).</p></section>`;

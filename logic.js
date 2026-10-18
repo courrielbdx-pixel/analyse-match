@@ -137,8 +137,9 @@
   // ---- combiné du jour (TICKETs officiels uniquement) ----
   function combineInfo(c) {
     if (!c || !(c.legs || []).length || c.legs.length < 2) return { none: true, text: "Pas de combiné aujourd'hui : moins de 2 tickets validés" };
-    const odds = c.legs.reduce((a, l) => a * l.odds, 1), p = c.legs.reduce((a, l) => a * l.prob, 1);
-    return { none: false, legs: c.legs, odds, p, ev: p * odds - 1, outcome: c.outcome || null };
+    const act = c.legs.filter(l => !l.cancelled); // v6.0.45 : jambe dont le ticket est annulé = cote 1 (void)
+    const odds = act.reduce((a, l) => a * l.odds, 1), p = act.reduce((a, l) => a * l.prob, 1);
+    return { none: false, legs: c.legs, odds, p, ev: p * odds - 1, outcome: c.outcome || null, cancelled: c.legs.length - act.length };
   }
   // Affichage : classer les jambes par datetime de coup d'envoi (pas seulement HH:MM)
   function sortLegsByKickoff(legs) {

@@ -1,5 +1,9 @@
 # Changelog — Analyse Match
 
+## v6.0.45 — 2026-10-18
+- Ticket annulé (H-1 ou relecture) jamais repris comme ticket du jour : les fichiers `picks/` publient la décision officielle par match (`decision` : TICKET, TARDIF, ANNULE, SKIP) ; nouveau récap `tickets_today.py` (lecture seule, sans API) pour la routine « Tickets du jour » : tickets actifs seulement, annulés à part avec leur raison. Cas Kasımpaşa–Samsunspor (annulé 9h55, listé à tort à 14h05).
+- Combiné du jour verrouillé avec une jambe annulée ensuite : la jambe est marquée « ⚠️ ticket annulé, compté à cote 1 » et réglée void (jamais perdue) ; cote et proba affichées sans elle. Bilan : un ticket annulé reste hors tickets (ANNULE), comme Cerro–Cerro Largo.
+
 ## v6.0.44 — 2026-10-17
 - Promus / relégués (lignes SKIP seulement, papier) : un match bloqué par la garde des 20 matchs est de nouveau lu si chaque équipe bloquée est **reléguée** (note de la division supérieure traduite, bonus estimé) ou a **≥ 10 matchs** dans sa division (note de l'autre division traduite, ou correction moyenne des promus si la division précédente n'est pas couverte ; mélange n/(n+5)). Sinon : « ⚠️ Historique insuffisant » inchangé et hors Bilan SKIP. Backtest : `research/backtest_promus_2026-10-17.md`.
 - Tickets inchangés : la règle des 20 matchs (comptes de la division, `team_samples`) s'applique toujours ; un match débloqué ne peut devenir ni ticket, ni ticket tardif, ni alerte H-1 (gardes dans `engine.reading`, `publish.late_ticket`, `alert_check.py`). Cotes jamais en entrée ; ligne principale = pick le plus probable ; continuité 6.0.39 inchangée.

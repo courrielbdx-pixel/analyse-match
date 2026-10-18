@@ -188,3 +188,7 @@ test("v6.0.44 historique inter-divisions : SKIP débloqué, plus de bandeau", ()
   assert.strictEqual(L.histo(r, rules), null);
   assert.ok(L.histo({ ...r, history_cross: undefined }, rules));
 });
+test("v6.0.45 combiné : jambe de ticket annulé comptée à cote 1", () => {
+  const c = { legs: [{ fixture_id: 1, odds: 1.86, prob: 0.565, cancelled: true }, { fixture_id: 2, odds: 1.84, prob: 0.577 }] };
+  const ci = L.combineInfo(c); assert.strictEqual(ci.cancelled, 1); assert.ok(Math.abs(ci.odds - 1.84) < 1e-9 && Math.abs(ci.p - 0.577) < 1e-9);
+});
