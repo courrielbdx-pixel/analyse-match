@@ -113,6 +113,8 @@
         p_from: t0.model_probability, p_to: tr ? tr.model_probability : null, odds_from: o0 != null ? o0 : null, odds_to: tr ? tr.odds : null, ev_from: t0.ev, ev_to: tr ? tr.ev : null };
       cancel.model_changed = tr && cancel.p_from != null && tr.model_probability != null ? Math.abs(tr.model_probability - cancel.p_from) >= 0.005 : null;
       cancel.odds_changed = tr && cancel.odds_from != null && tr.odds != null ? Math.abs(tr.odds - cancel.odds_from) >= 0.005 : null;
+      const lt = entry.late_after_cancel_reading_id && before.find(r => r.reading_id === entry.late_after_cancel_reading_id && r.label === "TICKET");
+      if (lt) return { reading: { ...lt, prev_cancel: cancel }, anomaly: null, readings: rs }; // v6.0.46 : nouveau pick B ticket tardif, bandeau de l'annulation de A à part
       const base = last === t0 ? { ...t0, skip_reasons_fr: [] } : last;
       return { reading: { ...base, label: "SKIP", cancelled: true, cancel_reason_fr: why, cancel_label_fr: lab, cancel, ticket_reading: t0,
         skip_reasons_fr: [`⚠️ ${lab} : ${why}`, ...((base.skip_reasons_fr) || [])] }, anomaly: null, readings: rs };

@@ -192,3 +192,11 @@ test("v6.0.45 combiné : jambe de ticket annulé comptée à cote 1", () => {
   const c = { legs: [{ fixture_id: 1, odds: 1.86, prob: 0.565, cancelled: true }, { fixture_id: 2, odds: 1.84, prob: 0.577 }] };
   const ci = L.combineInfo(c); assert.strictEqual(ci.cancelled, 1); assert.ok(Math.abs(ci.odds - 1.84) < 1e-9 && Math.abs(ci.p - 0.577) < 1e-9);
 });
+test("v6.0.46 ticket A annulé + ticket tardif B : B affiché, bandeau de A à part", () => {
+  const A = { reading_id: "5-r1", timestamp: "2026-10-19T22:00:00+02:00", label: "TICKET", pick: { market: "OU3.5", selection: "under", label_fr: "Moins de 3,5 buts" }, lineups_confirmed: false };
+  const B = { reading_id: "5-r4", timestamp: "2026-10-20T19:50:00+02:00", label: "TICKET", late_ticket: true, after_cancel: true, pick: { market: "DC", selection: "1X", label_fr: "1N" }, lineups_confirmed: true };
+  const e = { readings: [A, B], cancelled: true, cancel_reason_fr: "écart 7 pts", late_after_cancel_reading_id: "5-r4" };
+  const fr = L.finalReading(e, "2026-10-20T21:00:00+02:00");
+  assert.strictEqual(fr.reading.reading_id, "5-r4"); assert.strictEqual(fr.reading.label, "TICKET"); assert.ok(fr.reading.prev_cancel && fr.reading.prev_cancel.ticket_pick_fr === "Moins de 3,5 buts");
+  const fr2 = L.finalReading({ ...e, late_after_cancel_reading_id: undefined }, "2026-10-20T21:00:00+02:00"); assert.ok(fr2.reading.cancelled);
+});

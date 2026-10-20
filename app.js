@@ -286,7 +286,8 @@
     const fin = L.FINISHED.includes(f.status.short);
     const ko = Date.parse(f.kickoff) - now();
     const hasCompo = fr.readings.some(x => x.trigger === "compo");
-    const cb = r.cancelled ? `<div class="cancelban" role="status">⚠️ ${esc(L.cancelBanner(r.cancel) || `${r.cancel_label_fr} : ${r.cancel_reason_fr}`)}</div>` : "";
+    const cb = r.cancelled ? `<div class="cancelban" role="status">⚠️ ${esc(L.cancelBanner(r.cancel) || `${r.cancel_label_fr} : ${r.cancel_reason_fr}`)}</div>`
+      : r.prev_cancel ? `<div class="cancelban" role="status">⚠️ ${esc(L.cancelBanner(r.prev_cancel) || r.prev_cancel.reason_fr || "")} · nouveau pick ci-dessous (ticket tardif)</div>` : "";
     const hi = HI(r);
     if (hi) return rapportHisto(f, r, fr, hi, chk, fin, hasCompo);
     let h = `<section class="card rap"><h2>Rapport</h2>${cb}<div class="rb">${r.cancelled ? `Lecture actuelle : ${badge(r)} — pari le plus probable <b>${esc(r.pick.label_fr)}</b> ${L.pct(r.model_probability)}` : `${badge(r)} <b>${esc(r.pick.label_fr)}</b>`}</div>

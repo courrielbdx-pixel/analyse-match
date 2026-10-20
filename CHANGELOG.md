@@ -1,5 +1,9 @@
 # Changelog — Analyse Match
 
+## v6.0.46 — 2026-10-20
+- Ticket A annulé puis autre pick B qui passe dc-v1 sur le même match : B devient un ticket tardif (bilan TARDIF), avec les garde-fous d'un tardif (marge d'hystérésis 1 pt hors lecture compo, ≥ 30 min avant le coup d'envoi, un seul tardif par match ; A ne redevient jamais ticket). Page match : B affiché « 🆕 TICKET », bandeau de l'annulation de A à part. Alerte : `alert_check.py` liste « 🆕 Ticket tardif (remplace le ticket annulé) », dédupliquée sous la clé `<fixture>-late` d'`alerts_sent.json` (l'entrée du match garde l'annulation). `tickets_today.py` : B dans les tardifs.
+- Lectures postérieures au ticket verrouillé donnant TICKET sur un autre pick (sans être un tardif B) : publiées SKIP avec la raison « le ticket verrouillé reste … » (copie publiée, `state/` intact). Cas Stuttgart–Atlético (1N EV +5,9 %, écart 4,6 pts : marge non atteinte en relecture).
+
 ## v6.0.45 — 2026-10-18
 - Ticket annulé (H-1 ou relecture) jamais repris comme ticket du jour : les fichiers `picks/` publient la décision officielle par match (`decision` : TICKET, TARDIF, ANNULE, SKIP) ; nouveau récap `tickets_today.py` (lecture seule, sans API) pour la routine « Tickets du jour » : tickets actifs seulement, annulés à part avec leur raison. Cas Kasımpaşa–Samsunspor (annulé 9h55, listé à tort à 14h05).
 - Combiné du jour verrouillé avec une jambe annulée ensuite : la jambe est marquée « ⚠️ ticket annulé, compté à cote 1 » et réglée void (jamais perdue) ; cote et proba affichées sans elle. Bilan : un ticket annulé reste hors tickets (ANNULE), comme Cerro–Cerro Largo.
